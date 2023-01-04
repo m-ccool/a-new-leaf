@@ -15,12 +15,12 @@ export default function App() {
       <header>This is a {model.toLowerCase()} plant.</header>
       <Canvas camera={{ position: [-10, 5, 10], fov: 10 }}>
         <hemisphereLight color="white" groundColor="blue" intensity={0.75} />
-        <spotLight position={[50, 50, 10]} angle={0.15} penumbra={1} />
+        <spotLight position={[10, 10, 10]} angle={0.5} penumbra={1} />
         <group position={[0, 0, 0]}>
           <Model position={[0, 0.0, 0]} url={MODELS[model]} />
           <ContactShadows scale={10} blur={5} far={5} />
         </group>
-        <OrbitControls />
+        <OrbitControls autoRotate enableZoom={false} enablePan={false}/>
       </Canvas>
     </>
   )
