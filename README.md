@@ -19,7 +19,7 @@ With over **3,000 plant species entries**, the application provides tailored car
 ## Shortest Path To Live UI Readback
 
 1. Push changes to the `dev` branch to trigger the Pages deploy workflow.
-2. Ensure repository Actions secrets exist for `REACT_APP_PERENUAL_KEY` and `REACT_APP_OPENWEATHER_KEY`.
+2. Ensure the repository Actions secret `REACT_APP_PERENUAL_KEY` exists.
 3. Wait for the Deploy to GitHub Pages workflow to pass build and deploy jobs.
 4. Open the live site at https://m-ccool.github.io/a-new-leaf/ and verify key UI surfaces render.
 

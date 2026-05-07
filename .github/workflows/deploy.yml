@@ -36,7 +36,6 @@ jobs:
         run: npm run build
         working-directory: client
         env:
-          REACT_APP_OPENWEATHER_KEY: ${{ secrets.REACT_APP_OPENWEATHER_KEY }}
           REACT_APP_PERENUAL_KEY: ${{ secrets.REACT_APP_PERENUAL_KEY }}
 
       - name: Upload Pages artifact
