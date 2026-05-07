@@ -1,5 +1,6 @@
 const API_KEY = process.env.REACT_APP_PERENUAL_KEY;
-const BASE_URL = 'https://perenual.com/api';
+const BASE_V2  = 'https://perenual.com/api/v2';
+const BASE_V1  = 'https://perenual.com/api';
 
 export const hasApiKey = Boolean(API_KEY && API_KEY !== 'your_key_here');
 
@@ -15,11 +16,34 @@ export async function searchSpecies(query) {
   if (!hasApiKey || !query.trim()) return [];
   try {
     const res = await fetch(
-      `${BASE_URL}/species-list?key=${API_KEY}&q=${encodeURIComponent(query.trim())}&page=1`
+      `${BASE_V2}/species-list?key=${API_KEY}&q=${encodeURIComponent(query.trim())}&page=1`
     );
     if (!res.ok) return [];
     const data = await res.json();
     return (data.data ?? []).slice(0, 8);
+  } catch {
+    return [];
+  }
+}
+
+export async function getSpeciesDetails(id) {
+  if (!hasApiKey || !id) return null;
+  try {
+    const res = await fetch(`${BASE_V2}/species/details/${id}?key=${API_KEY}`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function getDiseases() {
+  if (!hasApiKey) return [];
+  try {
+    const res = await fetch(`${BASE_V1}/pest-disease-list?key=${API_KEY}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.data ?? [];
   } catch {
     return [];
   }

@@ -4,7 +4,7 @@ export default function WeatherWidget({ weather, loading, onClick }) {
   if (loading) {
     return (
       <button className="weather-chip weather-chip--loading" onClick={onClick} aria-label="Weather loading">
-        🌡 …
+        … °
       </button>
     );
   }
@@ -13,7 +13,6 @@ export default function WeatherWidget({ weather, loading, onClick }) {
   const { emoji } = wmoInfo(weather.code);
   return (
     <button className="weather-chip" onClick={onClick} aria-label="View weather details">
-      <span className="weather-chip__pin">📍</span>
       {emoji} {weather.temp}°
     </button>
   );

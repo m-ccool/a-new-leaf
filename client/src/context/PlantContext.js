@@ -1,5 +1,13 @@
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useWeather } from '../hooks/useWeather';
+import { SPECIES } from '../data/species';
+
+const DEMO_PLANTS = [
+  { id: 1001, addedAt: Date.now() - 1000*60*60*24*30, lastWatered: Date.now() - 1000*60*60*20, species: SPECIES[0], nickname: 'Gaia' },
+  { id: 1002, addedAt: Date.now() - 1000*60*60*24*60, lastWatered: Date.now() - 1000*60*60*72, species: SPECIES[7], nickname: 'Apollo' },
+  { id: 1003, addedAt: Date.now() - 1000*60*60*24*14, lastWatered: Date.now() - 1000*60*60*4,  species: SPECIES[4], nickname: 'Medusa' },
+];
 
 const PlantContext = createContext(null);
 
@@ -9,12 +17,30 @@ export function PlantProvider({ children }) {
     name: 'Plant Parent',
     bio: 'Keeper of green things.',
     avatarModelIdx: 0,
+    gardenName: 'My Garden',
+    accent: null,
+    streak: 0,
+    lastWateredDay: null,
   });
   const [settings, setSettings] = useLocalStorage('anl_settings', {
     darkMode: true,
     notifications: false,
     themeOverride: null,
+    isPro: false,
+    lastTipDate: null,
   });
+
+  const { weather, loading: weatherLoading } = useWeather();
+
+  const isDemo = new URLSearchParams(window.location.search).get('demo') === '1';
+
+  // Seed demo plants on first render if ?demo=1
+  useEffect(() => {
+    if (!isDemo) return;
+    setPlants(DEMO_PLANTS);
+    setSettings(prev => ({ ...prev, isPro: true }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDemo]);
 
   function addPlant(plant) {
     const now = Date.now();
@@ -26,9 +52,21 @@ export function PlantProvider({ children }) {
   }
 
   function waterPlant(id) {
+    const today = new Date().toDateString();
     setPlants(prev =>
       prev.map(p => (p.id === id ? { ...p, lastWatered: Date.now() } : p))
     );
+    // Update streak
+    setUser(prev => {
+      const lastDay = prev.lastWateredDay;
+      const yesterday = new Date(Date.now() - 86400000).toDateString();
+      const streak = lastDay === today
+        ? prev.streak
+        : lastDay === yesterday
+        ? (prev.streak ?? 0) + 1
+        : 1;
+      return { ...prev, streak, lastWateredDay: today };
+    });
   }
 
   // Computed water level based on elapsed time since last watering
@@ -38,10 +76,28 @@ export function PlantProvider({ children }) {
     return Math.max(0, Math.min(100, 100 - (elapsed / freqMs) * 100));
   }
 
-  // Happy level correlates with water but decays more slowly
+  // Happy level: water is critical; also considers live temp & sunlight (hidden stat)
   function getHappyLevel(plant) {
     const water = getWaterLevel(plant);
-    return Math.max(10, Math.min(100, water * 0.65 + 35));
+    if (!weather) return Math.max(10, Math.min(100, water * 0.65 + 35));
+
+    // Temp comfort: parse "~70°F" → 70, compare to live outdoor temp
+    const idealTemp = parseInt(String(plant.species?.temp ?? '70').replace(/[^\d]/g, ''), 10) || 70;
+    const tempDiff  = Math.abs((weather.temp ?? 70) - idealTemp);
+    const tempScore = tempDiff < 5 ? 100 : tempDiff < 10 ? 80 : tempDiff < 20 ? 60 : tempDiff < 30 ? 40 : 20;
+
+    // Sunlight score: current weather code vs plant light preference
+    const code  = weather.code ?? 0;
+    const light = (plant.species?.light ?? 'any').toLowerCase();
+    const isClear  = code <= 1;
+    const isPartly = code <= 3;
+    const lightScore = isClear
+      ? ((light.includes('sunny') || light.includes('full')) ? 100 : light.includes('bright') ? 90 : 80)
+      : isPartly
+      ? ((light.includes('sunny') || light.includes('full')) ? 68 : light.includes('bright') ? 84 : 92)
+      : ((light.includes('sunny') || light.includes('full')) ? 38 : light.includes('bright') ? 58 : 84);
+
+    return Math.max(10, Math.min(100, water * 0.55 + tempScore * 0.20 + lightScore * 0.25));
   }
 
   // Human-readable age from addedAt timestamp
@@ -53,13 +109,26 @@ export function PlantProvider({ children }) {
     return `${(days / 365).toFixed(1)}yr`;
   }
 
+  // Garden health grade — avg happy level across all plants
+  function getGardenGrade() {
+    if (plants.length === 0) return null;
+    const avg = plants.reduce((sum, p) => sum + getHappyLevel(p), 0) / plants.length;
+    if (avg >= 85) return 'A';
+    if (avg >= 70) return 'B';
+    if (avg >= 55) return 'C';
+    if (avg >= 40) return 'D';
+    return 'F';
+  }
+
   return (
     <PlantContext.Provider
       value={{
         plants, addPlant, removePlant, waterPlant,
-        getWaterLevel, getHappyLevel, getAge,
+        getWaterLevel, getHappyLevel, getAge, getGardenGrade,
         user, setUser,
         settings, setSettings,
+        weather, weatherLoading,
+        isDemo,
       }}
     >
       {children}

@@ -1,57 +1,99 @@
+import { useState, useEffect, useRef, Suspense } from 'react';
 import PlantViewer from './PlantViewer';
 import { usePlants } from '../context/PlantContext';
 
+function formatNextWatering(plant) {
+  if (!plant.lastWatered) return null;
+  const freqMs = (plant.species?.waterFreqDays ?? 7) * 24 * 3600 * 1000;
+  const msLeft = (plant.lastWatered + freqMs) - Date.now();
+  if (msLeft <= 0) return 'overdue';
+  const mins = Math.floor(msLeft / 60000);
+  if (mins < 60) return `${mins}m`;
+  const hrs = Math.floor(msLeft / 3600000);
+  if (hrs < 24) return `${hrs}h`;
+  const days = Math.floor(msLeft / 86400000);
+  if (days === 1) return 'tomorrow';
+  return `${days}d`;
+}
+
 function waterBarClass(pct) {
-  if (pct > 50) return 'plant-card__bar-fill--water-high';
-  if (pct > 25) return 'plant-card__bar-fill--water-mid';
+  if (pct > 30) return 'plant-card__bar-fill--water-high';
+  if (pct > 15) return 'plant-card__bar-fill--water-mid';
   return 'plant-card__bar-fill--water-low';
 }
 
-function statusDotClass(waterPct) {
-  if (waterPct > 50) return 'plant-card__status-dot--ok';
-  if (waterPct > 20) return 'plant-card__status-dot--warn';
+function happyBarClass(pct) {
+  if (pct > 60) return 'plant-card__bar-fill--happy-high';
+  if (pct > 30) return 'plant-card__bar-fill--happy-mid';
+  return 'plant-card__bar-fill--happy-low';
+}
+
+function statusDotClass(pct) {
+  if (pct > 50) return 'plant-card__status-dot--ok';
+  if (pct > 20) return 'plant-card__status-dot--warn';
   return 'plant-card__status-dot--critical';
 }
 
-export default function PlantCard({ plant, onCardClick }) {
-  const { getWaterLevel, getHappyLevel, getAge } = usePlants();
-
+export default function PlantCard({ plant, onCardClick, onLearn }) {
+  const { getWaterLevel, getHappyLevel } = usePlants();
   const waterPct = Math.round(getWaterLevel(plant));
   const happyPct = Math.round(getHappyLevel(plant));
+
+  const [overfill, setOverfill] = useState(false);
+  const prevWateredRef = useRef(plant.lastWatered);
+
+  useEffect(() => {
+    if (plant.lastWatered !== prevWateredRef.current) {
+      prevWateredRef.current = plant.lastWatered;
+      setOverfill(true);
+      const t = setTimeout(() => setOverfill(false), 700);
+      return () => clearTimeout(t);
+    }
+  }, [plant.lastWatered]);
+
+  const nextLabel = formatNextWatering(plant);
+  const isOverdue = nextLabel === 'overdue';
 
   return (
     <div className="plant-card" onClick={() => onCardClick(plant)}>
       <div className="plant-card__model">
         <span className={`plant-card__status-dot ${statusDotClass(waterPct)}`} />
-        <PlantViewer modelUrl={plant.species.model} height={180} />
+        <Suspense fallback={<div className="skeleton skeleton-model" />}>
+          <PlantViewer modelUrl={plant.species.model} height={180} />
+        </Suspense>
+        {onLearn && (
+          <button
+            className="plant-card__learn-btn"
+            onClick={e => { e.stopPropagation(); onLearn(plant); }}
+            aria-label={`Learn more about ${plant.species.name}`}
+          >📖</button>
+        )}
       </div>
 
       <div className="plant-card__info">
-        <p className="plant-card__age">{getAge(plant)}</p>
         <h3 className="plant-card__name">{plant.nickname}</h3>
-        <p className="plant-card__species">
-          {plant.species.name.toUpperCase()}
-          {plant.species.latin ? ` · ${plant.species.latin.toUpperCase()}` : ''}
-        </p>
 
         <div className="plant-card__bars">
-          <span className="plant-card__bar-icon">💧</span>
-          <div className="plant-card__bar-track">
+          <div className={`plant-card__bar-track${overfill ? ' plant-card__bar-track--overfill' : ''}`}>
             <div
-              className={`plant-card__bar-fill ${waterBarClass(waterPct)}`}
+              className={`plant-card__bar-fill ${waterBarClass(waterPct)}${overfill ? ' plant-card__bar-fill--overfill' : ''}`}
               style={{ width: `${waterPct}%` }}
             />
           </div>
-          <span className="plant-card__bar-icon">😊</span>
-          <div className="plant-card__bar-track">
+          <div className="plant-card__bar-track plant-card__bar-track--happy">
             <div
-              className="plant-card__bar-fill plant-card__bar-fill--happy"
+              className={`plant-card__bar-fill ${happyBarClass(happyPct)}`}
               style={{ width: `${happyPct}%` }}
             />
           </div>
         </div>
+
+        {nextLabel && (
+          <p className={`plant-card__watered${isOverdue ? ' plant-card__watered--critical' : ''}`}>
+            💧 {isOverdue ? 'overdue' : nextLabel}
+          </p>
+        )}
       </div>
     </div>
   );
 }
-

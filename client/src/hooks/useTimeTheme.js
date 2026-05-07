@@ -31,39 +31,39 @@ function getProgress(slot) {
 export const THEMES = {
   night: {
     name: 'night',
-    bg: 'linear-gradient(180deg, #06060f 0%, #0c0f1d 40%, #1a1542 80%, #2d1b69 100%)',
+    bg: 'linear-gradient(180deg, #02020e 0%, #080c22 35%, #131640 70%, #1e1b4b 100%)',
     label: 'Night',
     accent: '#6d28d9',
   },
   dawn: {
     name: 'dawn',
-    bg: 'linear-gradient(180deg, #1a1042 0%, #5c2a6b 25%, #c85c50 55%, #f4a560 80%, #fde9b0 100%)',
+    bg: 'linear-gradient(180deg, #2d1b69 0%, #8b3f7e 28%, #d46b60 55%, #f2a06a 78%, #fce5b0 100%)',
     label: 'Dawn',
     accent: '#fb923c',
   },
   morning: {
     name: 'morning',
-    bg: 'linear-gradient(180deg, #74c0fc 0%, #a8d8f0 45%, #d8eef7 80%, #eef7ff 100%)',
+    bg: 'linear-gradient(180deg, #b8d9f5 0%, #cde9f8 35%, #dff0f8 65%, #eef7ff 100%)',
     label: 'Morning',
     accent: '#38bdf8',
   },
   midday: {
     name: 'midday',
-    bg: 'linear-gradient(180deg, #0369a1 0%, #0ea5e9 30%, #38bdf8 60%, #bae6fd 90%, #e0f2fe 100%)',
+    bg: 'linear-gradient(180deg, #3ba9d8 0%, #5fc4f0 30%, #8dd6f7 60%, #c5eaf8 85%, #e5f5fd 100%)',
     label: 'Midday',
     accent: '#0ea5e9',
   },
   afternoon: {
     name: 'afternoon',
-    bg: 'linear-gradient(180deg, #0369a1 0%, #38bdf8 30%, #fbbf24 65%, #fb923c 85%, #fed7aa 100%)',
+    bg: 'linear-gradient(180deg, #8dd6f7 0%, #d8c2f5 35%, #f7d78a 62%, #f4a06a 82%, #fddbb4 100%)',
     label: 'Afternoon',
     accent: '#f59e0b',
   },
   dusk: {
     name: 'dusk',
-    bg: 'linear-gradient(180deg, #1e1b4b 0%, #4c1d95 20%, #7c3aed 40%, #c084fc 60%, #f472b6 80%, #fde68a 100%)',
+    bg: 'linear-gradient(180deg, #0d0c2b 0%, #1e1b5e 22%, #3730a3 45%, #6d5dd3 65%, #c4a8e8 82%, #f5e8d0 100%)',
     label: 'Dusk',
-    accent: '#c084fc',
+    accent: '#a89fdd',
   },
 };
 

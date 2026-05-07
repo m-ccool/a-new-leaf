@@ -1,27 +1,19 @@
 import { usePlants } from '../context/PlantContext';
-import { THEME_LIST, THEMES } from '../hooks/useTimeTheme';
+import { THEME_LIST, THEMES, useTimeTheme } from '../hooks/useTimeTheme';
 
 // Gradient previews for each theme tile
 const TILE_BG = {
-  dawn:      'linear-gradient(145deg, #1a1042 0%, #c85c50 55%, #f4a560 100%)',
-  morning:   'linear-gradient(145deg, #3b82f6 0%, #74c0fc 55%, #dbeafe 100%)',
-  midday:    'linear-gradient(145deg, #0369a1 0%, #0ea5e9 45%, #7dd3fc 100%)',
-  afternoon: 'linear-gradient(145deg, #0ea5e9 0%, #fbbf24 55%, #fed7aa 100%)',
-  dusk:      'linear-gradient(145deg, #1e1b4b 0%, #7c3aed 45%, #f472b6 85%, #fde68a 100%)',
-  night:     'linear-gradient(145deg, #020617 0%, #0f0a2e 45%, #2d1b69 100%)',
+  dawn:      'linear-gradient(145deg, #2d1b69 0%, #8b3f7e 40%, #f2a06a 100%)',
+  morning:   'linear-gradient(145deg, #5ca8e0 0%, #93c5fd 55%, #dbeafe 100%)',
+  midday:    'linear-gradient(145deg, #3ba9d8 0%, #5fc4f0 45%, #c5eaf8 100%)',
+  afternoon: 'linear-gradient(145deg, #8dd6f7 0%, #d8c2f5 45%, #f4a06a 100%)',
+  dusk:      'linear-gradient(145deg, #0d0c2b 0%, #3730a3 40%, #a89fdd 100%)',
+  night:     'linear-gradient(145deg, #02020e 0%, #0a0d28 45%, #1e1b4b 100%)',
 };
 
-const TILE_EMOJI = {
-  dawn:      '🌅',
-  morning:   '🌤',
-  midday:    '☀️',
-  afternoon: '🌇',
-  dusk:      '🌆',
-  night:     '🌙',
-};
-
-export default function SettingsModal({ onClose }) {
+export default function SettingsModal({ onClose, onUpgrade }) {
   const { settings, setSettings } = usePlants();
+  const autoTheme = useTimeTheme(null);
 
   function toggle(key) {
     setSettings(prev => ({ ...prev, [key]: !prev[key] }));
@@ -32,12 +24,23 @@ export default function SettingsModal({ onClose }) {
   }
 
   const currentOverride = settings.themeOverride ?? null;
+  const autoName = autoTheme.name;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal modal--center" onClick={e => e.stopPropagation()}>
         <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
         <h2 className="modal__title">Settings</h2>
+
+        {!settings.isPro && (
+          <button
+            className="settings__upgrade-row"
+            onClick={() => { onClose(); onUpgrade?.(); }}
+          >
+            <span>🌟 Upgrade to Pro</span>
+            <span className="settings__upgrade-caret">›</span>
+          </button>
+        )}
 
         <div className="settings__list">
           <div className="settings__row">
@@ -83,17 +86,15 @@ export default function SettingsModal({ onClose }) {
               className={`theme-tile theme-tile--auto${!currentOverride ? ' theme-tile--active' : ''}`}
               onClick={() => setThemeOverride(null)}
             >
-              <span className="theme-tile__icon">🔄</span>
               <span className="theme-tile__label">Auto</span>
             </button>
             {THEME_LIST.map(t => (
               <button
                 key={t}
-                className={`theme-tile${currentOverride === t ? ' theme-tile--active' : ''}`}
+                className={`theme-tile${currentOverride === t ? ' theme-tile--active' : ''}${!currentOverride && autoName === t ? ' theme-tile--current' : ''}`}
                 style={{ background: TILE_BG[t] }}
                 onClick={() => setThemeOverride(t)}
               >
-                <span className="theme-tile__icon">{TILE_EMOJI[t]}</span>
                 <span className="theme-tile__label">{THEMES[t].label}</span>
               </button>
             ))}

@@ -1,16 +1,20 @@
-import { Suspense, useRef } from 'react';
+import { Suspense, useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, OrbitControls, Environment } from '@react-three/drei';
 
 function Model({ url, compact }) {
   const { scene } = useGLTF(url);
+  // Clone so each viewer gets its own scene graph — multiple viewers sharing the
+  // same GLB URL (e.g. avatar + plant card) would otherwise fight over the same
+  // Three.js Object3D and one canvas would go blank.
+  const clone = useMemo(() => scene.clone(true), [scene]);
   const ref = useRef();
   useFrame((_, delta) => {
     if (ref.current) ref.current.rotation.y += delta * 0.4;
   });
   const scale = compact ? 2.2 : 1.4;
   const posY  = compact ? -0.2 : -0.8;
-  return <primitive ref={ref} object={scene} scale={scale} position={[0, posY, 0]} />;
+  return <primitive ref={ref} object={clone} scale={scale} position={[0, posY, 0]} />;
 }
 
 export default function PlantViewer({ modelUrl, height = 200, compact = false }) {
@@ -22,7 +26,7 @@ export default function PlantViewer({ modelUrl, height = 200, compact = false })
         <ambientLight intensity={0.8} />
         <directionalLight position={[5, 5, 5]} intensity={1} />
         <Suspense fallback={null}>
-          <Model url={modelUrl} compact={compact} />
+          <Model key={modelUrl} url={modelUrl} compact={compact} />
           <Environment preset="apartment" />
         </Suspense>
         <OrbitControls enableZoom={false} enablePan={false} />
