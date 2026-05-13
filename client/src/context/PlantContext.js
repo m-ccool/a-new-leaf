@@ -30,7 +30,7 @@ export function PlantProvider({ children }) {
     lastTipDate: null,
   });
 
-  const { weather, loading: weatherLoading } = useWeather();
+  const { weather, loading: weatherLoading, error: weatherError, retryWeather } = useWeather();
 
   const isDemo = new URLSearchParams(window.location.search).get('demo') === '1';
 
@@ -127,7 +127,7 @@ export function PlantProvider({ children }) {
         getWaterLevel, getHappyLevel, getAge, getGardenGrade,
         user, setUser,
         settings, setSettings,
-        weather, weatherLoading,
+        weather, weatherLoading, weatherError, retryWeather,
         isDemo,
       }}
     >

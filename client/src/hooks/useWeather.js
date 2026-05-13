@@ -33,6 +33,7 @@ export function useWeather() {
   const [weather, setWeather] = useState(null);
   const [error, setError]     = useState(null);
   const [loading, setLoading] = useState(false);
+  const [trigger, setTrigger] = useState(0);
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -40,6 +41,7 @@ export function useWeather() {
       return;
     }
     setLoading(true);
+    setError(null);
     navigator.geolocation.getCurrentPosition(
       async ({ coords }) => {
         const { latitude, longitude } = coords;
@@ -75,7 +77,9 @@ export function useWeather() {
       },
       () => { setError('denied'); setLoading(false); }
     );
-  }, []);
+  }, [trigger]);
 
-  return { weather, error, loading };
+  function retryWeather() { setTrigger(t => t + 1); }
+
+  return { weather, error, loading, retryWeather };
 }

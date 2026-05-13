@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { Dialog, DialogPanel } from '@headlessui/react';
 import { usePlants } from '../context/PlantContext';
 import { MODELS } from '../hooks/usePlantAPI';
 import PlantViewer from './PlantViewer';
@@ -12,12 +13,40 @@ const ACCENTS = [
   { key: 'white',  color: '#f0f4f8', label: 'Frost'},
 ];
 
-export default function ProfileModal({ onClose }) {
+export default function ProfileModal({ open, onClose }) {
   const { plants, user, setUser, getWaterLevel, getGardenGrade } = usePlants();
   const [name, setName] = useState(user.name);
   const [bio, setBio] = useState(user.bio);
   const [modelIdx, setModelIdx] = useState(user.avatarModelIdx ?? 0);
   const [accent, setAccent] = useState(user.accent ?? 'green');
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  // Custom color defaults to whatever the current accent is if it's a hex, else leaf green
+  const [customColor, setCustomColor] = useState(() => {
+    const a = user.accent ?? 'green';
+    return a.startsWith('#') ? a : '#52b788';
+  });
+  const pickerRef = useRef(null);
+  const btnRef = useRef(null);
+
+  // Close popup when clicking outside
+  useEffect(() => {
+    if (!showColorPicker) return;
+    function handleClick(e) {
+      if (
+        pickerRef.current && !pickerRef.current.contains(e.target) &&
+        btnRef.current && !btnRef.current.contains(e.target)
+      ) {
+        setShowColorPicker(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showColorPicker]);
+
+  // accent can be a preset key ('green', 'blue', …) or a hex string ('#rrggbb')
+  const accentColor = accent.startsWith('#')
+    ? accent
+    : (ACCENTS.find(a => a.key === accent)?.color ?? '#52b788');
 
   const needsWater = plants.filter(p => getWaterLevel(p) < 30).length;
   const thriving = plants.length - needsWater;
@@ -33,16 +62,17 @@ export default function ProfileModal({ onClose }) {
     onClose();
   }
 
-  const accentColor = ACCENTS.find(a => a.key === accent)?.color ?? '#52b788';
-
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal modal--center" onClick={e => e.stopPropagation()}>
-        <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
+    <Dialog open={open} onClose={onClose} transition className="modal-overlay">
+      <DialogPanel className="modal modal--center" onClick={e => e.stopPropagation()}>
+        <div className="sheet-handle" aria-hidden="true" />
+        <button className="modal__close" onClick={onClose} aria-label="Close">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M1 1l9 9M10 1L1 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+        </button>
 
         <div className="profile__avatar-wrap" style={{ '--accent': accentColor }}>
           <div className="profile__avatar-model">
-            <PlantViewer modelUrl={MODELS[modelIdx]} height={90} />
+            <PlantViewer modelUrl={MODELS[modelIdx]} height={110} compact />
           </div>
           <div className="profile__skin-nav">
             <button type="button" className="profile__skin-btn" onClick={prevSkin} aria-label="Previous skin">‹</button>
@@ -76,18 +106,43 @@ export default function ProfileModal({ onClose }) {
           {/* Accent color picker */}
           <div className="profile__accent-wrap">
             <p className="modal__label" style={{ marginBottom: '.4rem' }}>Accent Color</p>
-            <div className="profile__accent-row">
+            <div className="profile__accent-row" style={{ position: 'relative' }}>
               {ACCENTS.map(a => (
                 <button
                   key={a.key}
                   type="button"
                   className={`profile__accent-chip${accent === a.key ? ' profile__accent-chip--active' : ''}`}
                   style={{ '--chip-color': a.color }}
-                  onClick={() => setAccent(a.key)}
+                  onClick={() => { setAccent(a.key); setShowColorPicker(false); }}
                   aria-label={a.label}
                   title={a.label}
                 />
               ))}
+              {/* Custom color "+" button */}
+              <button
+                type="button"
+                ref={btnRef}
+                className={`profile__accent-add${accent.startsWith('#') ? ' profile__accent-add--active' : ''}`}
+                style={accent.startsWith('#') ? { background: accent, borderStyle: 'solid', borderColor: 'rgba(255,255,255,0.80)' } : {}}
+                onClick={() => setShowColorPicker(v => !v)}
+                aria-label="Custom color"
+                title="Custom color"
+              >
+                {accent.startsWith('#') ? <span style={{ color: '#fff', fontSize: '.8rem', lineHeight: 1 }}>✓</span> : '+'}
+              </button>
+              {showColorPicker && (
+                <div className="accent-picker-popup" ref={pickerRef}>
+                  <input
+                    type="color"
+                    value={customColor}
+                    onChange={e => { setCustomColor(e.target.value); setAccent(e.target.value); }}
+                    className="accent-picker-input"
+                    aria-label="Pick custom accent color"
+                  />
+                  <span className="accent-picker-label">Custom color</span>
+                  <button type="button" className="accent-picker-done" onClick={() => setShowColorPicker(false)}>Done</button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -122,7 +177,7 @@ export default function ProfileModal({ onClose }) {
             <button type="submit" className="btn btn--primary">Save Profile</button>
           </div>
         </form>
-      </div>
-    </div>
+      </DialogPanel>
+    </Dialog>
   );
 }

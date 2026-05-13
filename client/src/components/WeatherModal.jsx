@@ -1,3 +1,5 @@
+import { useRef } from 'react';
+import { Dialog, DialogPanel } from '@headlessui/react';
 import { wmoInfo } from '../hooks/useWeather';
 
 function fmtHour(h) {
@@ -7,8 +9,11 @@ function fmtHour(h) {
   return `${display}${suffix}`;
 }
 
-export default function WeatherModal({ weather, onClose }) {
-  if (!weather) return null;
+export default function WeatherModal({ open, weather: weatherProp, onClose }) {
+  const savedWeather = useRef(weatherProp);
+  if (weatherProp) savedWeather.current = weatherProp;
+  const weather = savedWeather.current;
+  if (!weather && !open) return null;
 
   const { emoji, label } = wmoInfo(weather.code);
   const currentHour = new Date().getHours();
@@ -25,9 +30,12 @@ export default function WeatherModal({ weather, onClose }) {
     : [];
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal modal--center" onClick={e => e.stopPropagation()}>
-        <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
+    <Dialog open={open} onClose={onClose} transition className="modal-overlay">
+      <DialogPanel className="modal modal--center">
+        <div className="sheet-handle" aria-hidden="true" />
+        <button className="modal__close" onClick={onClose} aria-label="Close">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M1 1l9 9M10 1L1 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+        </button>
         <h2 className="modal__title">Local Weather</h2>
 
         <div className="weather-current">
@@ -57,7 +65,7 @@ export default function WeatherModal({ weather, onClose }) {
         <div className="weather-footer">
           📍 {weather.lat}°, {weather.lon}° &nbsp;·&nbsp; {weather.timezone}
         </div>
-      </div>
-    </div>
+      </DialogPanel>
+    </Dialog>
   );
 }

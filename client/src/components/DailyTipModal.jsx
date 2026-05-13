@@ -1,10 +1,20 @@
+import { useRef } from 'react';
+import { Dialog, DialogPanel } from '@headlessui/react';
 import PlantViewer from './PlantViewer';
 
-export default function DailyTipModal({ tip, modelUrl, plantName, onClose }) {
+export default function DailyTipModal({ open, tip: tipProp, modelUrl, plantName, onClose }) {
+  const savedTip = useRef(tipProp);
+  if (tipProp) savedTip.current = tipProp;
+  const tip = savedTip.current;
+  if (!tip) return null;
+
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal daily-tip-modal" onClick={e => e.stopPropagation()}>
-        <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
+    <Dialog open={open} onClose={onClose} transition className="modal-overlay">
+      <DialogPanel className="modal daily-tip-modal">
+        <div className="sheet-handle" aria-hidden="true" />
+        <button className="modal__close" onClick={onClose} aria-label="Close">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M1 1l9 9M10 1L1 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+        </button>
 
         {modelUrl && (
           <div className="daily-tip__viewer">
@@ -24,7 +34,7 @@ export default function DailyTipModal({ tip, modelUrl, plantName, onClose }) {
             Got it 🌿
           </button>
         </div>
-      </div>
-    </div>
+      </DialogPanel>
+    </Dialog>
   );
 }

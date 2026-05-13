@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
+import { Dialog, DialogPanel } from '@headlessui/react';
 import { getDiseases, hasApiKey } from '../hooks/usePlantAPI';
 
-export default function DiseasePanel({ onClose }) {
+export default function DiseasePanel({ open, onClose }) {
   const [diseases, setDiseases]     = useState([]);
   const [loading, setLoading]       = useState(true);
   const [query, setQuery]           = useState('');
@@ -32,9 +33,12 @@ export default function DiseasePanel({ onClose }) {
       );
 
   return (
-    <div className="modal-overlay disease-overlay" onClick={onClose}>
-      <div className="modal disease-panel" onClick={e => e.stopPropagation()}>
-        <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
+    <Dialog open={open} onClose={onClose} transition className="modal-overlay disease-overlay">
+      <DialogPanel className="modal disease-panel">
+        <div className="sheet-handle" aria-hidden="true" />
+        <button className="modal__close" onClick={onClose} aria-label="Close">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M1 1l9 9M10 1L1 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+        </button>
         <h2 className="disease-panel__title">� Plant Checkup</h2>
 
         {/* Camera-first diagnose — opens native camera on mobile, file picker on desktop */}
@@ -110,7 +114,7 @@ export default function DiseasePanel({ onClose }) {
             ))
           )}
         </div>
-      </div>
-    </div>
+      </DialogPanel>
+    </Dialog>
   );
 }
