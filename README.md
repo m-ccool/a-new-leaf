@@ -54,6 +54,8 @@ With over **3,000 plant species entries**, the application provides tailored car
 ### **Frontend**
 - React.js  
 - Three.js (3D rendering & interaction)  
+- Headless UI (React) — accessible modal, switch, and combobox primitives  
+  *(shadcn/ui excluded: requires Tailwind + Vite, incompatible with CRA)*  
 - HTML5 / CSS3  
 
 ### **Backend**

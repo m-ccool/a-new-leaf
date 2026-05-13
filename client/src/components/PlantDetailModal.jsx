@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Dialog, DialogPanel } from '@headlessui/react';
 import PlantViewer from './PlantViewer';
 import { usePlants } from '../context/PlantContext';
 import { getSpeciesDetails, hasApiKey } from '../hooks/usePlantAPI';
@@ -36,7 +37,7 @@ function formatNextWatering(plant) {
   return `next watering: in ${days}d`;
 }
 
-export default function PlantDetailModal({ plant: plantProp, onClose, onLearn, onCheckup }) {
+export default function PlantDetailModal({ open, plant: plantProp, onClose, onLearn, onCheckup }) {
   const { plants, getWaterLevel, getHappyLevel, waterPlant, removePlant, weather } = usePlants();
 
   // Use live plant from context so bars update instantly after watering
@@ -105,9 +106,12 @@ export default function PlantDetailModal({ plant: plantProp, onClose, onLearn, o
   }, [plant.species.id, isApiPlant]);
 
   return (
-    <div className="modal-overlay plant-detail-overlay" onClick={onClose}>
-      <div className="modal plant-detail" onClick={e => e.stopPropagation()}>
-        <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
+    <Dialog open={open} onClose={onClose} transition className="modal-overlay plant-detail-overlay">
+      <DialogPanel className="modal plant-detail">
+        <div className="sheet-handle" aria-hidden="true" />
+        <button className="modal__close" onClick={onClose} aria-label="Close">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M1 1l9 9M10 1L1 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+        </button>
 
         {/* 3D model — full-bleed transparent window */}
         <div className="plant-detail__viewer">
@@ -237,7 +241,7 @@ export default function PlantDetailModal({ plant: plantProp, onClose, onLearn, o
             🗑 Remove
           </button>
         </div>
-      </div>
-    </div>
+      </DialogPanel>
+    </Dialog>
   );
 }

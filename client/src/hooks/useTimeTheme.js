@@ -43,13 +43,13 @@ export const THEMES = {
   },
   morning: {
     name: 'morning',
-    bg: 'linear-gradient(180deg, #b8d9f5 0%, #cde9f8 35%, #dff0f8 65%, #eef7ff 100%)',
-    label: 'Morning',
+    bg: 'linear-gradient(135deg, #38bdf8 0%, #1d78d8 45%, #312e9a 100%)',
+    label: 'Day',
     accent: '#38bdf8',
   },
   midday: {
     name: 'midday',
-    bg: 'linear-gradient(180deg, #3ba9d8 0%, #5fc4f0 30%, #8dd6f7 60%, #c5eaf8 85%, #e5f5fd 100%)',
+    bg: 'linear-gradient(135deg, #0ea5e9 0%, #2563eb 50%, #3730a3 100%)',
     label: 'Midday',
     accent: '#0ea5e9',
   },
@@ -67,7 +67,7 @@ export const THEMES = {
   },
 };
 
-export const THEME_LIST = ['dawn', 'morning', 'midday', 'afternoon', 'dusk', 'night'];
+export const THEME_LIST = ['dawn', 'morning', 'dusk', 'night'];
 
 export function useTimeTheme(override = null) {
   const [auto, setAuto] = useState(() => {

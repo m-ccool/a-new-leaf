@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { usePlants } from '../context/PlantContext';
 import { useTimeTheme } from '../hooks/useTimeTheme';
 import { MODELS } from '../hooks/usePlantAPI';
@@ -20,14 +20,27 @@ import { PLANT_TIPS } from '../data/tips';
 
 const SKELETON_COUNT = 4;
 
+// Maps user.accent keys to hex values (mirrors ProfileModal ACCENTS)
+const ACCENT_COLORS = {
+  green:  '#52b788',
+  blue:   '#38bdf8',
+  rose:   '#fb7185',
+  amber:  '#f59e0b',
+  purple: '#a78bfa',
+  white:  '#f0f4f8',
+};
+
 export default function HomePage() {
-  const { plants, addPlant, user, setUser, getWaterLevel, settings, setSettings, weather, weatherLoading, isDemo } = usePlants();
+  const { plants, addPlant, user, setUser, getWaterLevel, settings, setSettings, weather, weatherLoading, weatherError, retryWeather, isDemo } = usePlants();
   const theme = useTimeTheme(settings?.themeOverride ?? null);
   const [showAdd, setShowAdd]           = useState(false);
   const [showProfile, setShowProfile]   = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showWeather, setShowWeather]   = useState(false);
   const [selectedPlant, setSelectedPlant] = useState(null);
+  const savedSelectedPlant = useRef(null);
+  if (selectedPlant) savedSelectedPlant.current = selectedPlant;
+
   const [diseasePlant, setDiseasePlant]   = useState(null);
   const [loading, setLoading]           = useState(true);
   const [editingTitle, setEditingTitle] = useState(false);
@@ -35,6 +48,8 @@ export default function HomePage() {
   const [showTipModal, setShowTipModal] = useState(false);
   const [showSubscription, setShowSubscription] = useState(false);
   const [learnPlant, setLearnPlant] = useState(null);
+  const savedLearnPlant = useRef(null);
+  if (learnPlant) savedLearnPlant.current = learnPlant;
 
   // Pick a daily tip based on user's plants or a generic one
   const dailyTip = useMemo(() => {
@@ -50,6 +65,15 @@ export default function HomePage() {
 
   const today = new Date().toDateString();
   const showTipBanner = !loading && settings?.lastTipDate !== today;
+
+  const needsWater = plants.filter(p => getWaterLevel(p) < 30).length;
+  const avatarModel = MODELS[user.avatarModelIdx ?? 0];
+
+  // Resolve accent color from user preference (key or custom hex)
+  const accentColor = (() => {
+    const a = user?.accent ?? 'green';
+    return a.startsWith('#') ? a : (ACCENT_COLORS[a] ?? '#52b788');
+  })();
 
   function startEditTitle() {
     setTitleDraft(user.gardenName ?? 'My Garden');
@@ -67,14 +91,30 @@ export default function HomePage() {
     if (e.key === 'Escape') setEditingTitle(false);
   }
 
+  // Dynamic theme-color meta for iOS status bar
+  const THEME_COLOR_MAP = {
+    dawn: '#fde9b0', morning: '#bae6fd', midday: '#7dd3fc',
+    afternoon: '#fdba74', dusk: '#3730a3', night: '#04040f',
+  };
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', THEME_COLOR_MAP[theme.name] ?? '#04040f');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [theme.name]);
+
+  // Sync data-glass + data-theme to body so Headless UI portaled modals inherit CSS variables
+  // Also set --accent so portaled modal buttons/toggles pick up the accent color
+  useEffect(() => {
+    document.body.setAttribute('data-glass', settings?.darkMode ? 'dark' : 'light');
+    document.body.setAttribute('data-theme', theme.name);
+    document.body.style.setProperty('--accent', accentColor);
+  }, [settings?.darkMode, theme.name, accentColor]);
+
   // Brief skeleton flash on first mount for polish
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 500);
     return () => clearTimeout(t);
   }, []);
-
-  const needsWater = plants.filter(p => getWaterLevel(p) < 30).length;
-  const avatarModel = MODELS[user.avatarModelIdx ?? 0];
 
   function handleAdd(plant) {
     addPlant(plant);
@@ -90,7 +130,7 @@ export default function HomePage() {
       className="app"
       data-theme={theme.name}
       data-glass={settings?.darkMode ? 'dark' : 'light'}
-      style={{ backgroundImage: theme.bg }}
+      style={{ backgroundImage: theme.bg, '--accent': accentColor }}
     >
       <SkyOrb themeName={theme.name} weather={weather} />
 
@@ -102,8 +142,8 @@ export default function HomePage() {
           aria-label="Open profile"
           title={user.name}
         >
-          <div className="navbar__avatar-model">
-            <PlantViewer modelUrl={avatarModel} height={40} />
+          <div className="navbar__avatar-ring">
+            <PlantViewer modelUrl={avatarModel} height={55} compact yOffset={-0.3} />
           </div>
         </button>
 
@@ -129,6 +169,8 @@ export default function HomePage() {
         <WeatherWidget
           weather={weather}
           loading={weatherLoading}
+          error={weatherError}
+          onRetry={retryWeather}
           onClick={() => setShowWeather(true)}
         />
       </nav>
@@ -212,24 +254,32 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {showAdd      && <AddPlantModal  onAdd={handleAdd}          onClose={() => setShowAdd(false)} />}
-      {showProfile  && <ProfileModal                              onClose={() => setShowProfile(false)} />}
-      {showSettings && <SettingsModal onUpgrade={() => setShowSubscription(true)} onClose={() => setShowSettings(false)} />}
-      {showWeather  && weather && <WeatherModal weather={weather} onClose={() => setShowWeather(false)} />}
-      {selectedPlant && <PlantDetailModal plant={selectedPlant} onClose={() => setSelectedPlant(null)} onLearn={p => { setSelectedPlant(null); setLearnPlant(p); }} onCheckup={p => { setSelectedPlant(null); setDiseasePlant(p); }} />}
-      {diseasePlant  && <DiseasePanel onClose={() => setDiseasePlant(null)} />}
-      {showTipModal && dailyTip?.tip && (
-        <DailyTipModal
-          tip={dailyTip.tip}
-          plantName={dailyTip.plant?.name ?? null}
-          modelUrl={dailyTip.plant?.species?.model ?? null}
-          onClose={() => { setShowTipModal(false); dismissTip(); }}
+      <AddPlantModal  open={showAdd}                   onAdd={handleAdd}          onClose={() => setShowAdd(false)} />
+      <ProfileModal   open={showProfile}                                           onClose={() => setShowProfile(false)} />
+      <SettingsModal  open={showSettings}               onUpgrade={() => setShowSubscription(true)} onClose={() => setShowSettings(false)} />
+      <WeatherModal   open={showWeather && !!weather}   weather={weather}          onClose={() => setShowWeather(false)} />
+      {savedSelectedPlant.current && (
+        <PlantDetailModal
+          open={!!selectedPlant}
+          plant={savedSelectedPlant.current}
+          onClose={() => setSelectedPlant(null)}
+          onLearn={p => { setSelectedPlant(null); setLearnPlant(p); }}
+          onCheckup={p => { setSelectedPlant(null); setDiseasePlant(p); }}
         />
       )}
-      {showSubscription && <SubscriptionModal onClose={() => setShowSubscription(false)} />}
-      {learnPlant && (
+      <DiseasePanel   open={!!diseasePlant}                                        onClose={() => setDiseasePlant(null)} />
+      <DailyTipModal
+        open={showTipModal && !!dailyTip?.tip}
+        tip={dailyTip?.tip}
+        plantName={dailyTip?.plant?.name ?? null}
+        modelUrl={dailyTip?.plant?.species?.model ?? null}
+        onClose={() => { setShowTipModal(false); dismissTip(); }}
+      />
+      <SubscriptionModal open={showSubscription}                                   onClose={() => setShowSubscription(false)} />
+      {savedLearnPlant.current && (
         <SpeciesPanel
-          species={learnPlant.species}
+          open={!!learnPlant}
+          species={savedLearnPlant.current.species}
           onClose={() => setLearnPlant(null)}
           onUpgrade={() => { setLearnPlant(null); setShowSubscription(true); }}
         />

@@ -48,19 +48,34 @@ function cloudConfig(code, isNight) {
   return { overlay: '⛈', clouds: 4 };
 }
 
-// Cloud layer definitions — varying size, speed, vertical position, blur
-const CLOUD_LAYERS = [
-  { key: 'a', style: { top: '12%',  fontSize: '5rem',  animationDuration: '42s', animationDelay: '0s',    filter: 'blur(6px)',  opacity: 0.22 } },
-  { key: 'b', style: { top: '28%',  fontSize: '7rem',  animationDuration: '62s', animationDelay: '-20s',  filter: 'blur(9px)',  opacity: 0.16 } },
-  { key: 'c', style: { top: '8%',   fontSize: '4rem',  animationDuration: '34s', animationDelay: '-8s',   filter: 'blur(4px)',  opacity: 0.28 } },
-  { key: 'd', style: { top: '40%',  fontSize: '9rem',  animationDuration: '78s', animationDelay: '-35s',  filter: 'blur(12px)', opacity: 0.13 } },
+// CSS cloud layers — pure blob shapes, no emoji
+// Each: top (vh), width (vw), height (px), opacity, animDuration, animDelay, blur (px), brightness
+const CSS_CLOUD_LAYERS = [
+  { key: 'c1', top: '9vh',  width: '38vw', height: 56,  opacity: 0.82, dur: '44s',  delay: '0s',   blur: 0,   bright: 1.06 },
+  { key: 'c2', top: '15vh', width: '52vw', height: 72,  opacity: 0.72, dur: '68s',  delay: '-22s',  blur: 2,   bright: 1.0  },
+  { key: 'c3', top: '6vh',  width: '28vw', height: 40,  opacity: 0.88, dur: '34s',  delay: '-10s',  blur: 0,   bright: 1.08 },
+  { key: 'c4', top: '22vh', width: '62vw', height: 88,  opacity: 0.58, dur: '88s',  delay: '-40s',  blur: 4,   bright: 0.98 },
+  { key: 'c5', top: '11vh', width: '44vw', height: 60,  opacity: 0.76, dur: '55s',  delay: '-16s',  blur: 1,   bright: 1.04 },
+];
+
+// Emoji cloud layers — sizes and opacity staggered to match weather dashboard style
+// [top (vh), fontSize (rem), opacity, animDuration, animDelay]
+const EMOJI_CLOUD_LAYERS = [
+  { key: 'e1', top: '8vh',  size: '5.5rem', opacity: 0.70, dur: '46s',  delay: '0s'   },
+  { key: 'e2', top: '18vh', size: '7rem',   opacity: 0.55, dur: '70s',  delay: '-24s' },
+  { key: 'e3', top: '5vh',  size: '4rem',   opacity: 0.60, dur: '36s',  delay: '-11s' },
+  { key: 'e4', top: '28vh', size: '8rem',   opacity: 0.45, dur: '90s',  delay: '-42s' },
+  { key: 'e5', top: '13vh', size: '6rem',   opacity: 0.65, dur: '58s',  delay: '-18s' },
 ];
 
 export default function SkyOrb({ themeName, weather }) {
   const isNight = themeName === 'night' || themeName === 'dusk';
   const icon    = THEME_ICON[themeName] ?? '☀️';
   const { overlay, clouds } = cloudConfig(weather?.code ?? null, isNight);
-  const visibleClouds = CLOUD_LAYERS.slice(0, clouds);
+
+  // Clouds appear based on weather forecast only.
+  // On daytime themes without weather data, show 0 clouds (clear sky default).
+  const visibleClouds = EMOJI_CLOUD_LAYERS.slice(0, clouds);
 
   const showStars = themeName === 'night' || themeName === 'dusk';
   const starData  = themeName === 'night' ? STARS_NIGHT : STARS_DUSK;
@@ -76,9 +91,19 @@ export default function SkyOrb({ themeName, weather }) {
         />
       ))}
 
-      {/* Drifting cloud layer */}
+      {/* Drifting emoji cloud layers */}
       {visibleClouds.map(c => (
-        <span key={c.key} className="sky-orb__cloud" style={c.style}>☁️</span>
+        <span
+          key={c.key}
+          className="sky-orb__cloud"
+          style={{
+            top: c.top,
+            fontSize: c.size,
+            opacity: c.opacity,
+            animationDuration: c.dur,
+            animationDelay: c.delay,
+          }}
+        >☁️</span>
       ))}
 
       {/* Glow halo */}

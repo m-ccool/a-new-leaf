@@ -1,3 +1,4 @@
+import { Dialog, DialogPanel } from '@headlessui/react';
 import { usePlants } from '../context/PlantContext';
 
 const FREE_FEATURES = [
@@ -16,7 +17,7 @@ const PRO_FEATURES = [
   '🌿 Extended species database',
 ];
 
-export default function SubscriptionModal({ onClose }) {
+export default function SubscriptionModal({ open, onClose }) {
   const { settings, setSettings } = usePlants();
 
   function unlockPro() {
@@ -26,9 +27,12 @@ export default function SubscriptionModal({ onClose }) {
 
   if (settings?.isPro) {
     return (
-      <div className="modal-overlay" onClick={onClose}>
-        <div className="modal sub-modal" onClick={e => e.stopPropagation()}>
-          <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
+      <Dialog open={open} onClose={onClose} transition className="modal-overlay">
+        <DialogPanel className="modal sub-modal">
+          <div className="sheet-handle" aria-hidden="true" />
+          <button className="modal__close" onClick={onClose} aria-label="Close">
+            <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M1 1l9 9M10 1L1 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+          </button>
           <div className="sub-modal__pro-state">
             <p className="sub-modal__pro-badge">✦ Pro Member</p>
             <p className="sub-modal__pro-msg">You have full access to all A New Leaf features.</p>
@@ -39,16 +43,18 @@ export default function SubscriptionModal({ onClose }) {
           <button className="btn btn--ghost" style={{ width: '100%', marginTop: '.75rem' }} onClick={onClose}>
             Done
           </button>
-        </div>
-      </div>
+        </DialogPanel>
+      </Dialog>
     );
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal sub-modal" onClick={e => e.stopPropagation()}>
-        <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
-
+    <Dialog open={open} onClose={onClose} transition className="modal-overlay">
+      <DialogPanel className="modal sub-modal">
+        <div className="sheet-handle" aria-hidden="true" />
+        <button className="modal__close" onClick={onClose} aria-label="Close">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M1 1l9 9M10 1L1 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+        </button>
         <div className="sub-modal__header">
           <p className="sub-modal__leaf">🌿</p>
           <h2 className="sub-modal__title">A New Leaf Pro</h2>
@@ -74,7 +80,7 @@ export default function SubscriptionModal({ onClose }) {
           Unlock Pro
         </button>
         <p className="sub-modal__note">No payment required during preview · cancel anytime</p>
-      </div>
-    </div>
+      </DialogPanel>
+    </Dialog>
   );
 }

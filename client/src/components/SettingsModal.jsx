@@ -1,17 +1,11 @@
+import { Dialog, DialogPanel, Switch } from '@headlessui/react';
 import { usePlants } from '../context/PlantContext';
 import { THEME_LIST, THEMES, useTimeTheme } from '../hooks/useTimeTheme';
 
-// Gradient previews for each theme tile
-const TILE_BG = {
-  dawn:      'linear-gradient(145deg, #2d1b69 0%, #8b3f7e 40%, #f2a06a 100%)',
-  morning:   'linear-gradient(145deg, #5ca8e0 0%, #93c5fd 55%, #dbeafe 100%)',
-  midday:    'linear-gradient(145deg, #3ba9d8 0%, #5fc4f0 45%, #c5eaf8 100%)',
-  afternoon: 'linear-gradient(145deg, #8dd6f7 0%, #d8c2f5 45%, #f4a06a 100%)',
-  dusk:      'linear-gradient(145deg, #0d0c2b 0%, #3730a3 40%, #a89fdd 100%)',
-  night:     'linear-gradient(145deg, #02020e 0%, #0a0d28 45%, #1e1b4b 100%)',
-};
+// Theme tile backgrounds + animations are defined entirely in CSS
+// (.theme-tile--dawn, .theme-tile--morning, etc.)
 
-export default function SettingsModal({ onClose, onUpgrade }) {
+export default function SettingsModal({ open, onClose, onUpgrade }) {
   const { settings, setSettings } = usePlants();
   const autoTheme = useTimeTheme(null);
 
@@ -27,9 +21,12 @@ export default function SettingsModal({ onClose, onUpgrade }) {
   const autoName = autoTheme.name;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal modal--center" onClick={e => e.stopPropagation()}>
-        <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
+    <Dialog open={open} onClose={onClose} transition className="modal-overlay">
+      <DialogPanel className="modal modal--center">
+        <div className="sheet-handle" aria-hidden="true" />
+        <button className="modal__close" onClick={onClose} aria-label="Close">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M1 1l9 9M10 1L1 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+        </button>
         <h2 className="modal__title">Settings</h2>
 
         {!settings.isPro && (
@@ -48,13 +45,13 @@ export default function SettingsModal({ onClose, onUpgrade }) {
               <p className="settings__row-title">Dark Glass</p>
               <p className="settings__row-sub">Dark tint with white text</p>
             </div>
-            <button
+            <Switch
+              checked={!!settings.darkMode}
+              onChange={() => toggle('darkMode')}
               className={`toggle${settings.darkMode ? ' toggle--on' : ''}`}
-              onClick={() => toggle('darkMode')}
-              aria-pressed={settings.darkMode}
             >
               <span className="toggle__knob" />
-            </button>
+            </Switch>
           </div>
 
           <div className="settings__row">
@@ -62,13 +59,13 @@ export default function SettingsModal({ onClose, onUpgrade }) {
               <p className="settings__row-title">Watering Reminders</p>
               <p className="settings__row-sub">Notify when plants need water</p>
             </div>
-            <button
+            <Switch
+              checked={!!settings.notifications}
+              onChange={() => toggle('notifications')}
               className={`toggle${settings.notifications ? ' toggle--on' : ''}`}
-              onClick={() => toggle('notifications')}
-              aria-pressed={settings.notifications}
             >
               <span className="toggle__knob" />
-            </button>
+            </Switch>
           </div>
         </div>
 
@@ -81,7 +78,6 @@ export default function SettingsModal({ onClose, onUpgrade }) {
             </p>
           </div>
           <div className="theme-picker">
-            {/* Auto tile */}
             <button
               className={`theme-tile theme-tile--auto${!currentOverride ? ' theme-tile--active' : ''}`}
               onClick={() => setThemeOverride(null)}
@@ -91,8 +87,7 @@ export default function SettingsModal({ onClose, onUpgrade }) {
             {THEME_LIST.map(t => (
               <button
                 key={t}
-                className={`theme-tile${currentOverride === t ? ' theme-tile--active' : ''}${!currentOverride && autoName === t ? ' theme-tile--current' : ''}`}
-                style={{ background: TILE_BG[t] }}
+                className={`theme-tile theme-tile--${t}${currentOverride === t ? ' theme-tile--active' : ''}${!currentOverride && autoName === t ? ' theme-tile--current' : ''}`}
                 onClick={() => setThemeOverride(t)}
               >
                 <span className="theme-tile__label">{THEMES[t].label}</span>
@@ -105,7 +100,7 @@ export default function SettingsModal({ onClose, onUpgrade }) {
           <p>🌿 A New Leaf</p>
           <p className="settings__version">v0.2.0 — Local build</p>
         </div>
-      </div>
-    </div>
+      </DialogPanel>
+    </Dialog>
   );
 }

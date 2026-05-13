@@ -1,16 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
+import { Dialog, DialogPanel, Combobox, ComboboxInput, ComboboxOptions, ComboboxOption } from '@headlessui/react';
 import { SPECIES } from '../data/species';
 import PlantViewer from './PlantViewer';
-import { searchSpecies, mapApiToSpecies, modelForId, hasApiKey } from '../hooks/usePlantAPI';
+import { searchSpecies, mapApiToSpecies, modelForId, hasApiKey, MODELS } from '../hooks/usePlantAPI';
 
-const MODELS = [
-  '/models/plant-1.glb', '/models/plant-2.glb', '/models/plant-3.glb',
-  '/models/plant-4.glb', '/models/plant-5.glb', '/models/plant-6.glb',
-  '/models/plant-6.5.glb', '/models/plant-7.glb', '/models/plant-8.glb',
-  '/models/plant-9.glb', '/models/plant-10.glb',
-];
-
-export default function AddPlantModal({ onAdd, onClose }) {
+export default function AddPlantModal({ open, onAdd, onClose }) {
   const [nickname, setNickname] = useState('');
   const [modelIdx, setModelIdx] = useState(0);
 
@@ -49,12 +43,13 @@ export default function AddPlantModal({ onAdd, onClose }) {
       const data = await searchSpecies(query);
       setResults(data);
       setSearching(false);
-    }, 500);
+    }, 300);
     return () => clearTimeout(debounceRef.current);
   }, [query]);
 
-  // When API result selected, auto-assign model
+  // When API result selected via Combobox, auto-assign model
   function selectApiResult(plant) {
+    if (!plant) return;
     const mapped = mapApiToSpecies(plant, modelForId(plant.id));
     setSelectedApiSpecies(mapped);
     setModelIdx(MODELS.indexOf(mapped.model) !== -1 ? MODELS.indexOf(mapped.model) : 0);
@@ -77,9 +72,12 @@ export default function AddPlantModal({ onAdd, onClose }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
+    <Dialog open={open} onClose={onClose} transition className="modal-overlay">
+      <DialogPanel className="modal">
+        <div className="sheet-handle" aria-hidden="true" />
+        <button className="modal__close" onClick={onClose} aria-label="Close">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M1 1l9 9M10 1L1 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+        </button>
         <h2 className="modal__title">Add a Plant</h2>
 
         <div className="modal__preview">
@@ -115,37 +113,35 @@ export default function AddPlantModal({ onAdd, onClose }) {
             />
           </label>
 
-          {/* API search or local fallback */}
+          {/* API search (Headless UI Combobox) or local fallback */}
           {hasApiKey ? (
             <label className="modal__label">
               Search Species
-              <input
-                className="modal__input"
-                type="text"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                placeholder="e.g. jade plant, monstera…"
-              />
-              {searching && <span className="species-search-hint">Searching…</span>}
-              {results.length > 0 && (
-                <div className="species-results">
-                  {results.map(r => (
-                    <div
-                      key={r.id}
-                      className={`species-result${selectedApiSpecies?.id === `api-${r.id}` ? ' species-result--selected' : ''}`}
-                      onClick={() => selectApiResult(r)}
-                    >
-                      <p className="species-result__name">{r.common_name || r.scientific_name?.[0]}</p>
-                      <p className="species-result__latin">{r.scientific_name?.[0]}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {!hasApiKey && (
-                <span className="species-search-hint">
-                  Add REACT_APP_PERENUAL_KEY to client/.env.local for live search
-                </span>
-              )}
+              <Combobox value={selectedApiSpecies} onChange={selectApiResult} nullable>
+                <ComboboxInput
+                  className="modal__input"
+                  displayValue={(item) => item ? (item.name || query) : query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="e.g. jade plant, monstera…"
+                />
+                {searching && <span className="species-search-hint">Searching…</span>}
+                {results.length > 0 && (
+                  <ComboboxOptions as="div" className="species-results" static>
+                    {results.map(r => (
+                      <ComboboxOption
+                        key={r.id}
+                        value={r}
+                        className={({ focus, selected }) =>
+                          `species-result${selected ? ' species-result--selected' : ''}${focus ? ' species-result--active' : ''}`
+                        }
+                      >
+                        <p className="species-result__name">{r.common_name || r.scientific_name?.[0]}</p>
+                        <p className="species-result__latin">{r.scientific_name?.[0]}</p>
+                      </ComboboxOption>
+                    ))}
+                  </ComboboxOptions>
+                )}
+              </Combobox>
             </label>
           ) : (
             <label className="modal__label">
@@ -195,8 +191,8 @@ export default function AddPlantModal({ onAdd, onClose }) {
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </DialogPanel>
+    </Dialog>
   );
 }
 

@@ -1,11 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Dialog, DialogPanel } from '@headlessui/react';
 import { usePlants } from '../context/PlantContext';
 import PlantViewer from './PlantViewer';
 import LockBadge from './LockBadge';
 
 const API_KEY = process.env.REACT_APP_PERENUAL_KEY;
 
-export default function SpeciesPanel({ species, onClose, onUpgrade }) {
+export default function SpeciesPanel({ open, species: speciesProp, onClose, onUpgrade }) {
+  const savedSpecies = useRef(speciesProp);
+  if (speciesProp) savedSpecies.current = speciesProp;
+  const species = savedSpecies.current;
   const { settings } = usePlants();
   const isPro = settings?.isPro;
   const [perenual, setPerenual] = useState(null);
@@ -21,13 +25,18 @@ export default function SpeciesPanel({ species, onClose, onUpgrade }) {
       .catch(() => setLoading(false));
   }, [isPro, species?.perenualId]);
 
+  if (!species) return null;
+
   const imgUrl = perenual?.default_image?.medium_url ?? null;
   const description = perenual?.description ?? null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal species-panel" onClick={e => e.stopPropagation()}>
-        <button className="modal__close" onClick={onClose} aria-label="Close">✕</button>
+    <Dialog open={open} onClose={onClose} transition className="modal-overlay">
+      <DialogPanel className="modal species-panel">
+        <div className="sheet-handle" aria-hidden="true" />
+        <button className="modal__close" onClick={onClose} aria-label="Close">
+          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M1 1l9 9M10 1L1 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
+        </button>
 
         {/* Hero — model always visible */}
         <div className="species-panel__hero">
@@ -85,7 +94,7 @@ export default function SpeciesPanel({ species, onClose, onUpgrade }) {
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </DialogPanel>
+    </Dialog>
   );
 }
