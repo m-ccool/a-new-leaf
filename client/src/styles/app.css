@@ -213,11 +213,12 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
 }
 /* FAB idle shimmer — sweeps once every ~90s */
 @keyframes fabIdleShimmer {
-  0%, 91%  { transform: translateX(-140%) skewX(-22deg); opacity: 0; }
-  91.5%    { opacity: 0; }
-  94%      { opacity: .80; transform: translateX(0%)    skewX(-22deg); }
-  97%      { opacity: 0;  transform: translateX(140%)  skewX(-22deg); }
-  100%     { opacity: 0;  transform: translateX(140%)  skewX(-22deg); }
+  /* element: left:-10%, width:35% of 52px ≈ 18px wide, centered peak at ~translateX(120%) */
+  0%, 91%  { transform: translateX(-200%) skewX(-22deg); opacity: 0; }
+  91.5%    { opacity: 0;   transform: translateX(-200%) skewX(-22deg); }
+  94%      { opacity: .85; transform: translateX(120%)  skewX(-22deg); }
+  97%      { opacity: 0;   transform: translateX(330%)  skewX(-22deg); }
+  100%     { opacity: 0;   transform: translateX(330%)  skewX(-22deg); }
 }
 @keyframes slideUp { from { transform: translateY(40px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
 @keyframes popIn   { from { transform: scale(.94); opacity: 0 }       to { transform: scale(1); opacity: 1 } }
@@ -816,7 +817,9 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
 .bottombar__btn--add::after {
   content: '';
   position: absolute;
-  inset: -10%;
+  top: -10%;
+  bottom: -10%;
+  left: -10%;
   width: 35%;
   background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%);
   pointer-events: none;
