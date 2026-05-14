@@ -2,8 +2,16 @@ import { Suspense, useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useGLTF, OrbitControls, Environment } from '@react-three/drei';
 
+function resolveAssetUrl(url) {
+  if (!url) return url;
+  if (/^https?:\/\//i.test(url)) return url;
+  const base = process.env.PUBLIC_URL || '';
+  if (url.startsWith('/')) return `${base}${url}`;
+  return `${base}/${url}`;
+}
+
 function Model({ url, compact }) {
-  const { scene } = useGLTF(url);
+  const { scene } = useGLTF(resolveAssetUrl(url));
   // Clone so each viewer gets its own scene graph — multiple viewers sharing the
   // same GLB URL (e.g. avatar + plant card) would otherwise fight over the same
   // Three.js Object3D and one canvas would go blank.
