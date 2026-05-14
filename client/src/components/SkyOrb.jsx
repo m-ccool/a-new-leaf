@@ -48,16 +48,6 @@ function cloudConfig(code, isNight) {
   return { overlay: '⛈', clouds: 4 };
 }
 
-// CSS cloud layers — pure blob shapes, no emoji
-// Each: top (vh), width (vw), height (px), opacity, animDuration, animDelay, blur (px), brightness
-const CSS_CLOUD_LAYERS = [
-  { key: 'c1', top: '9vh',  width: '38vw', height: 56,  opacity: 0.82, dur: '44s',  delay: '0s',   blur: 0,   bright: 1.06 },
-  { key: 'c2', top: '15vh', width: '52vw', height: 72,  opacity: 0.72, dur: '68s',  delay: '-22s',  blur: 2,   bright: 1.0  },
-  { key: 'c3', top: '6vh',  width: '28vw', height: 40,  opacity: 0.88, dur: '34s',  delay: '-10s',  blur: 0,   bright: 1.08 },
-  { key: 'c4', top: '22vh', width: '62vw', height: 88,  opacity: 0.58, dur: '88s',  delay: '-40s',  blur: 4,   bright: 0.98 },
-  { key: 'c5', top: '11vh', width: '44vw', height: 60,  opacity: 0.76, dur: '55s',  delay: '-16s',  blur: 1,   bright: 1.04 },
-];
-
 // Emoji cloud layers — sizes and opacity staggered to match weather dashboard style
 // [top (vh), fontSize (rem), opacity, animDuration, animDelay]
 const EMOJI_CLOUD_LAYERS = [
