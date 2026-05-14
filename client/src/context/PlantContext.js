@@ -3,6 +3,24 @@ import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useWeather } from '../hooks/useWeather';
 import { SPECIES } from '../data/species';
 
+const DEFAULT_USER = {
+  name: 'Plant Parent',
+  bio: 'Keeper of green things.',
+  avatarModelIdx: 0,
+  gardenName: 'My Garden',
+  accent: null,
+  streak: 0,
+  lastWateredDay: null,
+};
+
+const DEFAULT_SETTINGS = {
+  darkMode: true,
+  notifications: false,
+  themeOverride: null,
+  isPro: false,
+  lastTipDate: null,
+};
+
 const DEMO_PLANTS = [
   { id: 1001, addedAt: Date.now() - 1000*60*60*24*30, lastWatered: Date.now() - 1000*60*60*20, species: SPECIES[0], nickname: 'Gaia' },
   { id: 1002, addedAt: Date.now() - 1000*60*60*24*60, lastWatered: Date.now() - 1000*60*60*72, species: SPECIES[7], nickname: 'Apollo' },
@@ -11,24 +29,43 @@ const DEMO_PLANTS = [
 
 const PlantContext = createContext(null);
 
+function isObject(v) {
+  return v !== null && typeof v === 'object' && !Array.isArray(v);
+}
+
+function normalizeUser(raw) {
+  if (!isObject(raw)) return DEFAULT_USER;
+  return {
+    ...DEFAULT_USER,
+    ...raw,
+    avatarModelIdx: Number.isFinite(raw.avatarModelIdx) ? raw.avatarModelIdx : 0,
+    streak: Number.isFinite(raw.streak) ? raw.streak : 0,
+  };
+}
+
+function normalizeSettings(raw) {
+  if (!isObject(raw)) return DEFAULT_SETTINGS;
+  return {
+    ...DEFAULT_SETTINGS,
+    ...raw,
+    darkMode: typeof raw.darkMode === 'boolean' ? raw.darkMode : DEFAULT_SETTINGS.darkMode,
+    notifications: typeof raw.notifications === 'boolean' ? raw.notifications : DEFAULT_SETTINGS.notifications,
+    isPro: typeof raw.isPro === 'boolean' ? raw.isPro : DEFAULT_SETTINGS.isPro,
+  };
+}
+
+function normalizePlants(raw) {
+  return Array.isArray(raw) ? raw : [];
+}
+
 export function PlantProvider({ children }) {
-  const [plants, setPlants] = useLocalStorage('anl_plants_v2', []);
-  const [user, setUser] = useLocalStorage('anl_user', {
-    name: 'Plant Parent',
-    bio: 'Keeper of green things.',
-    avatarModelIdx: 0,
-    gardenName: 'My Garden',
-    accent: null,
-    streak: 0,
-    lastWateredDay: null,
-  });
-  const [settings, setSettings] = useLocalStorage('anl_settings', {
-    darkMode: true,
-    notifications: false,
-    themeOverride: null,
-    isPro: false,
-    lastTipDate: null,
-  });
+  const [plantsRaw, setPlants] = useLocalStorage('anl_plants_v2', []);
+  const [userRaw, setUser] = useLocalStorage('anl_user', DEFAULT_USER);
+  const [settingsRaw, setSettings] = useLocalStorage('anl_settings', DEFAULT_SETTINGS);
+
+  const plants = normalizePlants(plantsRaw);
+  const user = normalizeUser(userRaw);
+  const settings = normalizeSettings(settingsRaw);
 
   const { weather, loading: weatherLoading, error: weatherError, retryWeather } = useWeather();
 

@@ -66,16 +66,13 @@ export function mapApiToSpecies(apiPlant, modelUrl) {
   };
 }
 
-// Assign a GLB model deterministically from the 11 available models
-// process.env.PUBLIC_URL is injected by CRA at build/dev time:
-//   dev  → /a-new-leaf  (from homepage in package.json)
-//   prod → https://m-ccool.github.io/a-new-leaf
-const _pub = process.env.PUBLIC_URL || '';
+// Assign a GLB model deterministically from the 11 available models.
+// Keep these root-relative; PlantViewer resolves them with PUBLIC_URL once.
 export const MODELS = [
-  `${_pub}/models/plant-1.glb`, `${_pub}/models/plant-2.glb`, `${_pub}/models/plant-3.glb`,
-  `${_pub}/models/plant-4.glb`, `${_pub}/models/plant-5.glb`, `${_pub}/models/plant-6.glb`,
-  `${_pub}/models/plant-6.5.glb`, `${_pub}/models/plant-7.glb`, `${_pub}/models/plant-8.glb`,
-  `${_pub}/models/plant-9.glb`, `${_pub}/models/plant-10.glb`,
+  '/models/plant-1.glb', '/models/plant-2.glb', '/models/plant-3.glb',
+  '/models/plant-4.glb', '/models/plant-5.glb', '/models/plant-6.glb',
+  '/models/plant-6.5.glb', '/models/plant-7.glb', '/models/plant-8.glb',
+  '/models/plant-9.glb', '/models/plant-10.glb',
 ];
 
 export function modelForId(id) {

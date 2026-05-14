@@ -6,6 +6,7 @@ function resolveAssetUrl(url) {
   if (!url) return url;
   if (/^https?:\/\//i.test(url)) return url;
   const base = process.env.PUBLIC_URL || '';
+  if (base && url.startsWith(`${base}/`)) return url;
   if (url.startsWith('/')) return `${base}${url}`;
   return `${base}/${url}`;
 }
