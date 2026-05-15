@@ -256,7 +256,7 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
                   <img
                     className="plant-detail__photo"
                     src={plantPhoto.dataUrl}
-                    alt={`${plant.nickname} photo`}
+                    alt={plant.nickname}
                   />
                   <div className="plant-detail__photo-actions">
                     <button className="btn plant-detail__photo-btn" onClick={() => photoRef.current?.click()}>
