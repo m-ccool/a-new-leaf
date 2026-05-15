@@ -2,19 +2,27 @@ import { Dialog, DialogPanel } from '@headlessui/react';
 import { usePlants } from '../context/PlantContext';
 
 const FREE_FEATURES = [
-  '3D plant gallery',
+  '3D plant gallery (all models)',
   'Water & happiness tracking',
-  'Live weather integration',
+  'Live weather + GPS integration',
+  'Time-of-day sky themes',
   'Daily plant tip',
-  'Watering streak & garden grade',
-  'Theme customization',
+  'Watering streak + garden grade',
+  'Accent color picker',
+  'Offline mode (PWA)',
 ];
 
 const PRO_FEATURES = [
   'Everything in Free',
-  '📖 Plant encyclopedia (Perenual)',
-  '🔬 AI disease & pest identification',
-  '🌿 Extended species database',
+  '📖 Plant encyclopedia (10k+ species)',
+  '🔬 Disease & pest identification',
+  '📷 Photo journal per plant',
+  '📅 Seasonal care calendar',
+  '📋 Plant health event log',
+  '📊 Advanced stats & streak graph',
+  '🎨 Custom accent colors + hex picker',
+  '☁️ iCloud / Google Drive backup',
+  '⏰ Per-plant reminder scheduling',
 ];
 
 export default function SubscriptionModal({ open, onClose }) {
@@ -58,7 +66,7 @@ export default function SubscriptionModal({ open, onClose }) {
         <div className="sub-modal__header">
           <p className="sub-modal__leaf">🌿</p>
           <h2 className="sub-modal__title">A New Leaf Pro</h2>
-          <p className="sub-modal__price">$1.99 / mo &nbsp;·&nbsp; $9.99 / yr</p>
+          <p className="sub-modal__price">$1.99 &nbsp;·&nbsp; one time, forever</p>
         </div>
 
         <div className="sub-modal__compare">
@@ -79,7 +87,7 @@ export default function SubscriptionModal({ open, onClose }) {
         <button className="btn btn--primary sub-modal__cta" onClick={unlockPro}>
           Unlock Pro
         </button>
-        <p className="sub-modal__note">No payment required during preview · cancel anytime</p>
+        <p className="sub-modal__note">Unlock once. Every future Pro feature included.</p>
       </DialogPanel>
     </Dialog>
   );

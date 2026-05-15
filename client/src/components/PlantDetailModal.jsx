@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogPanel } from '@headlessui/react';
 import PlantViewer from './PlantViewer';
+import LockBadge from './LockBadge';
 import { usePlants } from '../context/PlantContext';
 import { getSpeciesDetails, hasApiKey } from '../hooks/usePlantAPI';
 
@@ -37,8 +38,8 @@ function formatNextWatering(plant) {
   return `next watering: in ${days}d`;
 }
 
-export default function PlantDetailModal({ open, plant: plantProp, onClose, onLearn, onCheckup }) {
-  const { plants, getWaterLevel, getHappyLevel, waterPlant, removePlant, weather } = usePlants();
+export default function PlantDetailModal({ open, plant: plantProp, onClose, onLearn, onCheckup, onOpenSubscription }) {
+  const { plants, getWaterLevel, getHappyLevel, waterPlant, removePlant, weather, settings, photos, setPlantPhoto, removePlantPhoto } = usePlants();
 
   // Use live plant from context so bars update instantly after watering
   const plant = plants.find(p => p.id === plantProp.id) ?? plantProp;
@@ -61,6 +62,30 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
   // Overfill animation on water bar
   const [overfill, setOverfill] = useState(false);
   const prevWateredRef = useRef(plant.lastWatered);
+
+  // Photo journal
+  const photoRef = useRef(null);
+  const plantPhoto = photos?.[plant.id] ?? null;
+  const isPro = settings?.isPro ?? false;
+
+  function handlePhotoSelect(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const MAX = 600;
+      const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width  = Math.round(img.width  * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      setPlantPhoto(plant.id, canvas.toDataURL('image/jpeg', 0.75));
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+    e.target.value = '';
+  }
 
   useEffect(() => {
     if (plant.lastWatered !== prevWateredRef.current) {
@@ -219,6 +244,51 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
           )}
           {isApiPlant && apiLoading && (
             <><div className="plant-detail__divider" /><div className="skeleton plant-detail__desc-skel" style={{ margin: '.6rem .9rem' }} /></>
+          )}
+        </div>
+
+        {/* Photo journal — Pro-gated */}
+        <div className="plant-detail__section plant-detail__photo-section">
+          {isPro ? (
+            <>
+              {plantPhoto ? (
+                <div className="plant-detail__photo-wrap">
+                  <img
+                    className="plant-detail__photo"
+                    src={plantPhoto.dataUrl}
+                    alt={`${plant.nickname} photo`}
+                  />
+                  <div className="plant-detail__photo-actions">
+                    <button className="btn plant-detail__photo-btn" onClick={() => photoRef.current?.click()}>
+                      📷 Retake
+                    </button>
+                    <button className="btn plant-detail__photo-btn plant-detail__photo-btn--remove" onClick={() => removePlantPhoto(plant.id)}>
+                      🗑 Remove
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button className="plant-detail__photo-add" onClick={() => photoRef.current?.click()}>
+                  <span className="plant-detail__photo-icon">📷</span>
+                  <span className="plant-detail__photo-add-label">Add a photo</span>
+                  <span className="plant-detail__photo-add-sub">Stored privately on your device</span>
+                </button>
+              )}
+              <input
+                ref={photoRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                style={{ display: 'none' }}
+                onChange={handlePhotoSelect}
+              />
+            </>
+          ) : (
+            <div className="plant-detail__photo-locked">
+              <span className="plant-detail__photo-icon">📷</span>
+              <span className="plant-detail__photo-locked-label">Photo Journal</span>
+              <LockBadge onUnlock={onOpenSubscription} />
+            </div>
           )}
         </div>
 

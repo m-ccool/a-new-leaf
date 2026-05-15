@@ -265,6 +265,7 @@ export default function HomePage() {
           onClose={() => setSelectedPlant(null)}
           onLearn={p => { setSelectedPlant(null); setLearnPlant(p); }}
           onCheckup={p => { setSelectedPlant(null); setDiseasePlant(p); }}
+          onOpenSubscription={() => { setSelectedPlant(null); setShowSubscription(true); }}
         />
       )}
       <DiseasePanel   open={!!diseasePlant}                                        onClose={() => setDiseasePlant(null)} />

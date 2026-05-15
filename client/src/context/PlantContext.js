@@ -63,6 +63,21 @@ export function PlantProvider({ children }) {
   const [userRaw, setUser] = useLocalStorage('anl_user', DEFAULT_USER);
   const [settingsRaw, setSettings] = useLocalStorage('anl_settings', DEFAULT_SETTINGS);
 
+  // Photo journal — { [plantId]: { dataUrl: string, capturedAt: number } }
+  const [photos, setPhotos] = useLocalStorage('anl_photos', {});
+
+  function setPlantPhoto(plantId, dataUrl) {
+    setPhotos(prev => ({ ...prev, [plantId]: { dataUrl, capturedAt: Date.now() } }));
+  }
+
+  function removePlantPhoto(plantId) {
+    setPhotos(prev => {
+      const next = { ...prev };
+      delete next[plantId];
+      return next;
+    });
+  }
+
   const plants = normalizePlants(plantsRaw);
   const user = normalizeUser(userRaw);
   const settings = normalizeSettings(settingsRaw);
@@ -164,6 +179,7 @@ export function PlantProvider({ children }) {
         getWaterLevel, getHappyLevel, getAge, getGardenGrade,
         user, setUser,
         settings, setSettings,
+        photos, setPlantPhoto, removePlantPhoto,
         weather, weatherLoading, weatherError, retryWeather,
         isDemo,
       }}
