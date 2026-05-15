@@ -74,25 +74,25 @@ With over **3,000 plant species entries**, the application provides tailored car
 **Documentation:** https://perenual.com/docs/api  
 *(Includes example responses and code snippets)*
 
-**API Key:** `sk-0JgV69fa5794469cc17020`  
-> Store in `client/.env.local` as `REACT_APP_PERENUAL_KEY=sk-0JgV69fa5794469cc17020`  
-> This file is `.gitignore`d and never committed.
+> Store in `client/.env.local` as `REACT_APP_PERENUAL_KEY=your_key_here`  
+> This file is `.gitignore`d and never committed.  
+> Set `REACT_APP_PERENUAL_KEY` as a GitHub Actions secret for production builds.
 
 ### Endpoints
 
 **Plant Species List**
 ```
-GET https://perenual.com/api/v2/species-list?key=sk-0JgV69fa5794469cc17020
+GET https://perenual.com/api/v2/species-list?key=YOUR_KEY
 ```
 
 **Plant Details**
 ```
-GET https://perenual.com/api/v2/species/details/[ID]?key=sk-0JgV69fa5794469cc17020
+GET https://perenual.com/api/v2/species/details/[ID]?key=YOUR_KEY
 ```
 
 **Plant Disease List**
 ```
-GET https://perenual.com/api/pest-disease-list?key=sk-0JgV69fa5794469cc17020
+GET https://perenual.com/api/pest-disease-list?key=YOUR_KEY
 ```
 
 ---
