@@ -65,9 +65,15 @@ export const THEMES = {
     label: 'Dusk',
     accent: '#a89fdd',
   },
+  black: {
+    name: 'black',
+    bg: 'linear-gradient(180deg, #000000 0%, #080808 100%)',
+    label: 'Black',
+    accent: '#52b788',
+  },
 };
 
-export const THEME_LIST = ['dawn', 'morning', 'dusk', 'night'];
+export const THEME_LIST = ['dawn', 'morning', 'dusk', 'night', 'black'];
 
 export function useTimeTheme(override = null) {
   const [auto, setAuto] = useState(() => {

@@ -86,6 +86,7 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
   const plantEvents = isPro ? getPlantEvents(plant.id) : [];
   const [noteInput, setNoteInput] = useState('');
   const [showNoteInput, setShowNoteInput] = useState(false);
+  const [logOpen, setLogOpen] = useState(false);
 
   function handlePhotoSelect(e) {
     const file = e.target.files?.[0];
@@ -162,22 +163,48 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
           <PlantViewer modelUrl={plant.species.model} height={300} />
         </div>
 
-        {/* Identity */}
+        {/* Identity — photo avatar floated right for Pro users */}
         <div className="plant-detail__identity">
-          <h2 className="plant-detail__name">{plant.nickname}</h2>
-          <p className="plant-detail__species">
-            {plant.species.name}
-            {plant.species.latin ? <em> · {plant.species.latin}</em> : ''}
-          </p>
-          {nextLabel && (
-            <p className={`plant-card__watered${isOverdue ? ' plant-card__watered--critical' : ''} plant-detail__watered`}>
-              💧 {nextLabel}
+          <div className="plant-detail__identity-text">
+            <h2 className="plant-detail__name">{plant.nickname}</h2>
+            <p className="plant-detail__species">
+              {plant.species.name}
+              {plant.species.latin ? <em> · {plant.species.latin}</em> : ''}
             </p>
-          )}
-          {plant.species.toxic && (
-            <p className="plant-card__toxic">⚠️ Toxic to cats &amp; dogs</p>
+            {nextLabel && (
+              <p className={`plant-card__watered${isOverdue ? ' plant-card__watered--critical' : ''} plant-detail__watered`}>
+                💧 {nextLabel}
+              </p>
+            )}
+            {plant.species.toxic && (
+              <p className="plant-card__toxic">⚠️ Toxic to cats &amp; dogs</p>
+            )}
+          </div>
+          {isPro && (
+            <button className="plant-detail__photo-avatar" onClick={() => photoRef.current?.click()} aria-label="Plant photo">
+              {plantPhoto
+                ? <img className="plant-detail__avatar-img" src={plantPhoto.dataUrl} alt={plant.nickname} />
+                : <span className="plant-detail__avatar-placeholder">📷</span>
+              }
+              {plantPhoto && (
+                <span
+                  className="plant-detail__avatar-remove"
+                  role="button"
+                  aria-label="Remove photo"
+                  onClick={e => { e.stopPropagation(); removePlantPhoto(plant.id); }}
+                >×</span>
+              )}
+            </button>
           )}
         </div>
+        <input
+          ref={photoRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          style={{ display: 'none' }}
+          onChange={handlePhotoSelect}
+        />
 
         {/* Status bars — glass section card */}
         <div className="plant-detail__section">
@@ -266,97 +293,60 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
           )}
         </div>
 
-        {/* Photo journal — Pro-gated */}
-        <div className="plant-detail__section plant-detail__photo-section">
-          {isPro ? (
-            <>
-              {plantPhoto ? (
-                <div className="plant-detail__photo-wrap">
-                  <img
-                    className="plant-detail__photo"
-                    src={plantPhoto.dataUrl}
-                    alt={plant.nickname}
-                  />
-                  <div className="plant-detail__photo-actions">
-                    <button className="btn plant-detail__photo-btn" onClick={() => photoRef.current?.click()}>
-                      📷 Retake
-                    </button>
-                    <button className="btn plant-detail__photo-btn plant-detail__photo-btn--remove" onClick={() => removePlantPhoto(plant.id)}>
-                      🗑 Remove
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <button className="plant-detail__photo-add" onClick={() => photoRef.current?.click()}>
-                  <span className="plant-detail__photo-icon">📷</span>
-                  <span className="plant-detail__photo-add-label">Add a photo</span>
-                  <span className="plant-detail__photo-add-sub">Stored privately on your device</span>
-                </button>
-              )}
-              <input
-                ref={photoRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                style={{ display: 'none' }}
-                onChange={handlePhotoSelect}
-              />
-            </>
-          ) : (
-            <div className="plant-detail__photo-locked">
-              <span className="plant-detail__photo-icon">📷</span>
-              <span className="plant-detail__photo-locked-label">Photo Journal</span>
-              <LockBadge onUnlock={onOpenSubscription} />
-            </div>
-          )}
-        </div>
-
         {/* Event log — Pro-gated */}
         <div className="plant-detail__section plant-detail__events-section">
           {isPro ? (
             <>
               <div className="plant-detail__events-header">
-                <span className="plant-detail__events-title">Care Log</span>
+                <button
+                  className={`plant-detail__events-toggle${logOpen ? ' plant-detail__events-toggle--open' : ''}`}
+                  onClick={() => setLogOpen(o => !o)}
+                >
+                  <span className="plant-detail__events-title">Care Log</span>
+                  <span className="plant-detail__events-chevron">›</span>
+                </button>
                 <div className="plant-detail__events-actions">
                   <button className="plant-detail__event-btn" onClick={() => addPlantEvent(plant.id, 'repotted')}>🪴 Repotted</button>
                   <button className="plant-detail__event-btn" onClick={() => addPlantEvent(plant.id, 'fertilized')}>🌿 Fertilized</button>
                   <button className="plant-detail__event-btn" onClick={() => setShowNoteInput(s => !s)}>📝 Note</button>
                 </div>
               </div>
-              {showNoteInput && (
-                <div className="plant-detail__note-row">
-                  <input
-                    className="plant-detail__note-input"
-                    value={noteInput}
-                    onChange={e => setNoteInput(e.target.value)}
-                    placeholder="Add a note…"
-                    maxLength={120}
-                  />
-                  <button className="btn btn--primary plant-detail__note-save" onClick={() => {
-                    if (noteInput.trim()) {
-                      addPlantEvent(plant.id, 'noted', noteInput.trim());
-                      setNoteInput('');
-                      setShowNoteInput(false);
-                    }
-                  }}>Save</button>
-                </div>
-              )}
-              {plantEvents.length > 0 ? (
-                <ul className="plant-detail__events-timeline">
-                  {plantEvents.slice(0, 10).map((ev, i) => (
-                    <li key={i} className="plant-detail__event">
-                      <span className="plant-detail__event-icon">{ev.type === 'watered' ? '💧' : ev.type === 'repotted' ? '🪴' : ev.type === 'fertilized' ? '🌿' : '📝'}</span>
-                      <div className="plant-detail__event-body">
-                        <span className="plant-detail__event-label">{ev.type.charAt(0).toUpperCase() + ev.type.slice(1)}</span>
-                        {ev.note && <span className="plant-detail__event-note">{ev.note}</span>}
-                      </div>
-                      <span className="plant-detail__event-time">{formatEventTime(ev.timestamp)}</span>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="plant-detail__events-empty">No events yet. Start by watering!</p>
-              )}
+              <div className={`plant-detail__events-body${logOpen ? ' plant-detail__events-body--open' : ''}`}>
+                {showNoteInput && (
+                  <div className="plant-detail__note-row">
+                    <input
+                      className="plant-detail__note-input"
+                      value={noteInput}
+                      onChange={e => setNoteInput(e.target.value)}
+                      placeholder="Add a note…"
+                      maxLength={120}
+                    />
+                    <button className="btn btn--primary plant-detail__note-save" onClick={() => {
+                      if (noteInput.trim()) {
+                        addPlantEvent(plant.id, 'noted', noteInput.trim());
+                        setNoteInput('');
+                        setShowNoteInput(false);
+                      }
+                    }}>Save</button>
+                  </div>
+                )}
+                {plantEvents.length > 0 ? (
+                  <ul className="plant-detail__events-timeline">
+                    {plantEvents.slice(0, 10).map((ev, i) => (
+                      <li key={i} className="plant-detail__event">
+                        <span className="plant-detail__event-icon">{ev.type === 'watered' ? '💧' : ev.type === 'repotted' ? '🪴' : ev.type === 'fertilized' ? '🌿' : '📝'}</span>
+                        <div className="plant-detail__event-body">
+                          <span className="plant-detail__event-label">{ev.type.charAt(0).toUpperCase() + ev.type.slice(1)}</span>
+                          {ev.note && <span className="plant-detail__event-note">{ev.note}</span>}
+                        </div>
+                        <span className="plant-detail__event-time">{formatEventTime(ev.timestamp)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="plant-detail__events-empty">No events yet. Start by watering!</p>
+                )}
+              </div>
             </>
           ) : (
             <div className="plant-detail__photo-locked">
