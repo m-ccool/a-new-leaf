@@ -100,7 +100,8 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
   const [noteInput, setNoteInput] = useState('');
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
-  const [calOpen, setCalOpen] = useState(false);
+  const [calOpen, setCalOpen]   = useState(false);
+  const [descOpen, setDescOpen]  = useState(false);
   const [calMonth, setCalMonth] = useState(new Date().getMonth());
   const currentMonth = new Date().getMonth();
 
@@ -319,24 +320,32 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
             )}
           </div>
 
-          {/* Water / description note inside section */}
-          {(plant.species.water || (isApiPlant && !apiLoading && apiDetails?.description)) && (
+          {/* Water note + description book toggle */}
+          {(plant.species.water || isApiPlant) && (
             <>
               <div className="plant-detail__divider" />
-              {isApiPlant && !apiLoading && apiDetails?.description && (
-                <p className="plant-detail__water-note" style={{ fontStyle: 'italic' }}>
-                  {apiDetails.description.length > 200
-                    ? apiDetails.description.slice(0, 200) + '…'
-                    : apiDetails.description}
-                </p>
-              )}
-              {plant.species.water && (
-                <p className="plant-detail__water-note">{plant.species.water}</p>
+              <div className="plant-detail__desc-row">
+                {plant.species.water && (
+                  <p className="plant-detail__water-note">{plant.species.water}</p>
+                )}
+                {isApiPlant && !apiLoading && apiDetails?.description && (
+                  <button
+                    className={`plant-detail__desc-btn${descOpen ? ' plant-detail__desc-btn--open' : ''}`}
+                    onClick={() => setDescOpen(o => !o)}
+                    aria-expanded={descOpen}
+                    aria-label="About this species"
+                  >
+                    📖
+                  </button>
+                )}
+                {isApiPlant && apiLoading && (
+                  <span className="skeleton skeleton-line plant-detail__desc-skel" style={{ width: 32, height: 32, borderRadius: '50%' }} />
+                )}
+              </div>
+              {descOpen && apiDetails?.description && (
+                <p className="plant-detail__desc-text">{apiDetails.description}</p>
               )}
             </>
-          )}
-          {isApiPlant && apiLoading && (
-            <><div className="plant-detail__divider" /><div className="skeleton plant-detail__desc-skel" style={{ margin: '.6rem .9rem' }} /></>
           )}
         </div>
 

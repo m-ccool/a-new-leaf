@@ -1716,6 +1716,39 @@ select.modal__input {
 }
 
 .plant-detail__desc-skel { height: 60px; margin: 0 1.25rem .65rem; }
+/* Description row: water note + book toggle button */
+.plant-detail__desc-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-2) var(--sp-4);
+  gap: var(--sp-2);
+}
+.plant-detail__desc-btn {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.09);
+  border: 1px solid rgba(255,255,255,0.18);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background 150ms var(--ease-ios), transform 120ms var(--ease-spring);
+}
+.plant-detail__desc-btn--open {
+  background: rgba(255,255,255,0.18);
+  border-color: rgba(255,255,255,0.34);
+  transform: scale(1.08);
+}
+.plant-detail__desc-btn:active { transform: scale(0.90); }
+.plant-detail__desc-text {
+  font-size: var(--fs-footnote);
+  line-height: 1.55;
+  color: var(--text-muted);
+  padding: 0 var(--sp-4) var(--sp-3);
+  margin: 0;
+  animation: fadeInUp 180ms var(--ease-ios) both;
+}
 .plant-detail__care-skel { width: 52px; height: .8rem; }
 
 /* Photo journal */
