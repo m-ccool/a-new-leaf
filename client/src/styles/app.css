@@ -1826,6 +1826,48 @@ select.modal__input {
   text-align: center; padding: var(--sp-3) 0;
 }
 
+/* Seasonal care calendar */
+.plant-detail__cal-section { padding: 0 1rem; }
+.plant-detail__cal-body {
+  overflow: hidden; max-height: 0;
+  transition: max-height 300ms var(--ease-ios);
+}
+.plant-detail__cal-body--open { max-height: 180px; }
+.plant-detail__months {
+  display: flex; gap: var(--sp-1);
+  padding: var(--sp-2) 0 var(--sp-2);
+  overflow-x: auto; scrollbar-width: none;
+}
+.plant-detail__months::-webkit-scrollbar { display: none; }
+.plant-detail__month-chip {
+  flex: none;
+  padding: .22rem .52rem;
+  border-radius: var(--radius-xs);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  font-size: var(--fs-caption2);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms var(--ease-ios), color 150ms var(--ease-ios), border-color 150ms var(--ease-ios);
+}
+.plant-detail__month-chip--current {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.plant-detail__month-chip--active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+.plant-detail__cal-tip {
+  font-size: var(--fs-footnote);
+  color: var(--text);
+  line-height: 1.55;
+  padding: 0 0 var(--sp-3);
+  min-height: 2.4rem;
+}
+
 /* Actions row */
 .plant-detail__actions {
   display: flex;

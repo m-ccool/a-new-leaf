@@ -4,6 +4,18 @@ import PlantViewer from './PlantViewer';
 import LockBadge from './LockBadge';
 import { usePlants } from '../context/PlantContext';
 import { getSpeciesDetails, hasApiKey } from '../hooks/usePlantAPI';
+import { SPECIES_CALENDAR, GENERIC_CALENDAR } from '../data/species';
+
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function getCalendarTip(plant, monthIdx) {
+  const cal = SPECIES_CALENDAR[plant.species?.id];
+  if (cal?.[monthIdx]) return cal[monthIdx];
+  const water = plant.species?.water ?? 'Medium';
+  const key = (water === 'High' || water === 'Frequent') ? 'High'
+    : (water === 'Low' || water === 'Minimum') ? 'Low' : 'Medium';
+  return GENERIC_CALENDAR[key][monthIdx];
+}
 
 function waterBarClass(pct) {
   if (pct > 30) return 'plant-card__bar-fill--water-high';
@@ -87,6 +99,9 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
   const [noteInput, setNoteInput] = useState('');
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
+  const [calOpen, setCalOpen] = useState(false);
+  const [calMonth, setCalMonth] = useState(new Date().getMonth());
+  const currentMonth = new Date().getMonth();
 
   function handlePhotoSelect(e) {
     const file = e.target.files?.[0];
@@ -290,6 +305,43 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
           )}
           {isApiPlant && apiLoading && (
             <><div className="plant-detail__divider" /><div className="skeleton plant-detail__desc-skel" style={{ margin: '.6rem .9rem' }} /></>
+          )}
+        </div>
+
+        {/* Seasonal care calendar — Pro-gated */}
+        <div className="plant-detail__section plant-detail__cal-section">
+          {isPro ? (
+            <>
+              <div className="plant-detail__events-header">
+                <button
+                  className={`plant-detail__events-toggle${calOpen ? ' plant-detail__events-toggle--open' : ''}`}
+                  onClick={() => setCalOpen(o => !o)}
+                >
+                  <span className="plant-detail__events-title">📅 Seasonal Care</span>
+                  <span className="plant-detail__events-chevron">›</span>
+                </button>
+              </div>
+              <div className={`plant-detail__cal-body${calOpen ? ' plant-detail__cal-body--open' : ''}`}>
+                <div className="plant-detail__months">
+                  {MONTHS.map((m, i) => (
+                    <button
+                      key={i}
+                      className={`plant-detail__month-chip${calMonth === i ? ' plant-detail__month-chip--active' : ''}${currentMonth === i && calMonth !== i ? ' plant-detail__month-chip--current' : ''}`}
+                      onClick={() => setCalMonth(i)}
+                    >
+                      {m}
+                    </button>
+                  ))}
+                </div>
+                <p className="plant-detail__cal-tip">{getCalendarTip(plant, calMonth)}</p>
+              </div>
+            </>
+          ) : (
+            <div className="plant-detail__photo-locked">
+              <span className="plant-detail__photo-icon">📅</span>
+              <span className="plant-detail__photo-locked-label">Seasonal Care</span>
+              <LockBadge onUnlock={onOpenSubscription} />
+            </div>
           )}
         </div>
 
