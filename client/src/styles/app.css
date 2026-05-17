@@ -915,6 +915,8 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
   padding: 1.5rem 1.25rem 1.75rem;
   width: 100%;
   max-width: 480px;
+  max-height: 90dvh;
+  overflow-y: auto;
   position: relative;
   /* Transition handled by Headless UI Dialog data attributes */
   transition: transform 0.36s var(--ease-spring, cubic-bezier(.34,1.56,.64,1)),
@@ -943,7 +945,7 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
 }
 .modal-overlay[data-closed] .modal {
   opacity: 0;
-  transform: translateY(20px) scale(0.98);
+  transform: translateY(16px) scale(0.98);
 }
 /* Chromatic specular on modals — matches card style */
 .modal::before {
