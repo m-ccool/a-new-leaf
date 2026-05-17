@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogPanel } from '@headlessui/react';
 import PlantViewer from './PlantViewer';
+import LockBadge from './LockBadge';
 import { usePlants } from '../context/PlantContext';
 import { getSpeciesDetails, hasApiKey } from '../hooks/usePlantAPI';
 
@@ -37,8 +38,22 @@ function formatNextWatering(plant) {
   return `next watering: in ${days}d`;
 }
 
-export default function PlantDetailModal({ open, plant: plantProp, onClose, onLearn, onCheckup }) {
-  const { plants, getWaterLevel, getHappyLevel, waterPlant, removePlant, weather } = usePlants();
+function formatEventTime(ts) {
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(diff / 3600000);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(diff / 86400000);
+  if (days === 1) return 'yesterday';
+  if (days < 30) return `${days}d ago`;
+  const d = new Date(ts);
+  return `${d.toLocaleString('default', { month: 'short' })} ${d.getDate()}`;
+}
+
+export default function PlantDetailModal({ open, plant: plantProp, onClose, onLearn, onCheckup, onOpenSubscription }) {
+  const { plants, getWaterLevel, getHappyLevel, waterPlant, removePlant, weather, settings, photos, setPlantPhoto, removePlantPhoto, addPlantEvent, getPlantEvents } = usePlants();
 
   // Use live plant from context so bars update instantly after watering
   const plant = plants.find(p => p.id === plantProp.id) ?? plantProp;
@@ -61,6 +76,36 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
   // Overfill animation on water bar
   const [overfill, setOverfill] = useState(false);
   const prevWateredRef = useRef(plant.lastWatered);
+
+  // Photo journal
+  const photoRef = useRef(null);
+  const plantPhoto = photos?.[plant.id] ?? null;
+  const isPro = settings?.isPro ?? false;
+
+  // Event log
+  const plantEvents = isPro ? getPlantEvents(plant.id) : [];
+  const [noteInput, setNoteInput] = useState('');
+  const [showNoteInput, setShowNoteInput] = useState(false);
+  const [logOpen, setLogOpen] = useState(false);
+
+  function handlePhotoSelect(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const MAX = 600;
+      const scale = Math.min(1, MAX / Math.max(img.width, img.height));
+      const canvas = document.createElement('canvas');
+      canvas.width  = Math.round(img.width  * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      setPlantPhoto(plant.id, canvas.toDataURL('image/jpeg', 0.75));
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
+    e.target.value = '';
+  }
 
   useEffect(() => {
     if (plant.lastWatered !== prevWateredRef.current) {
@@ -118,22 +163,48 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
           <PlantViewer modelUrl={plant.species.model} height={300} />
         </div>
 
-        {/* Identity */}
+        {/* Identity — photo avatar floated right for Pro users */}
         <div className="plant-detail__identity">
-          <h2 className="plant-detail__name">{plant.nickname}</h2>
-          <p className="plant-detail__species">
-            {plant.species.name}
-            {plant.species.latin ? <em> · {plant.species.latin}</em> : ''}
-          </p>
-          {nextLabel && (
-            <p className={`plant-card__watered${isOverdue ? ' plant-card__watered--critical' : ''} plant-detail__watered`}>
-              💧 {nextLabel}
+          <div className="plant-detail__identity-text">
+            <h2 className="plant-detail__name">{plant.nickname}</h2>
+            <p className="plant-detail__species">
+              {plant.species.name}
+              {plant.species.latin ? <em> · {plant.species.latin}</em> : ''}
             </p>
-          )}
-          {plant.species.toxic && (
-            <p className="plant-card__toxic">⚠️ Toxic to cats &amp; dogs</p>
+            {nextLabel && (
+              <p className={`plant-card__watered${isOverdue ? ' plant-card__watered--critical' : ''} plant-detail__watered`}>
+                💧 {nextLabel}
+              </p>
+            )}
+            {plant.species.toxic && (
+              <p className="plant-card__toxic">⚠️ Toxic to cats &amp; dogs</p>
+            )}
+          </div>
+          {isPro && (
+            <button className="plant-detail__photo-avatar" onClick={() => photoRef.current?.click()} aria-label="Plant photo">
+              {plantPhoto
+                ? <img className="plant-detail__avatar-img" src={plantPhoto.dataUrl} alt={plant.nickname} />
+                : <span className="plant-detail__avatar-placeholder">📷</span>
+              }
+              {plantPhoto && (
+                <span
+                  className="plant-detail__avatar-remove"
+                  role="button"
+                  aria-label="Remove photo"
+                  onClick={e => { e.stopPropagation(); removePlantPhoto(plant.id); }}
+                >×</span>
+              )}
+            </button>
           )}
         </div>
+        <input
+          ref={photoRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          style={{ display: 'none' }}
+          onChange={handlePhotoSelect}
+        />
 
         {/* Status bars — glass section card */}
         <div className="plant-detail__section">
@@ -219,6 +290,70 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
           )}
           {isApiPlant && apiLoading && (
             <><div className="plant-detail__divider" /><div className="skeleton plant-detail__desc-skel" style={{ margin: '.6rem .9rem' }} /></>
+          )}
+        </div>
+
+        {/* Event log — Pro-gated */}
+        <div className="plant-detail__section plant-detail__events-section">
+          {isPro ? (
+            <>
+              <div className="plant-detail__events-header">
+                <button
+                  className={`plant-detail__events-toggle${logOpen ? ' plant-detail__events-toggle--open' : ''}`}
+                  onClick={() => setLogOpen(o => !o)}
+                >
+                  <span className="plant-detail__events-title">Care Log</span>
+                  <span className="plant-detail__events-chevron">›</span>
+                </button>
+                <div className="plant-detail__events-actions">
+                  <button className="plant-detail__event-btn" onClick={() => addPlantEvent(plant.id, 'repotted')}>🪴 Repotted</button>
+                  <button className="plant-detail__event-btn" onClick={() => addPlantEvent(plant.id, 'fertilized')}>🌿 Fertilized</button>
+                  <button className="plant-detail__event-btn" onClick={() => setShowNoteInput(s => !s)}>📝 Note</button>
+                </div>
+              </div>
+              <div className={`plant-detail__events-body${logOpen ? ' plant-detail__events-body--open' : ''}`}>
+                {showNoteInput && (
+                  <div className="plant-detail__note-row">
+                    <input
+                      className="plant-detail__note-input"
+                      value={noteInput}
+                      onChange={e => setNoteInput(e.target.value)}
+                      placeholder="Add a note…"
+                      maxLength={120}
+                    />
+                    <button className="btn btn--primary plant-detail__note-save" onClick={() => {
+                      if (noteInput.trim()) {
+                        addPlantEvent(plant.id, 'noted', noteInput.trim());
+                        setNoteInput('');
+                        setShowNoteInput(false);
+                      }
+                    }}>Save</button>
+                  </div>
+                )}
+                {plantEvents.length > 0 ? (
+                  <ul className="plant-detail__events-timeline">
+                    {plantEvents.slice(0, 10).map((ev, i) => (
+                      <li key={i} className="plant-detail__event">
+                        <span className="plant-detail__event-icon">{ev.type === 'watered' ? '💧' : ev.type === 'repotted' ? '🪴' : ev.type === 'fertilized' ? '🌿' : '📝'}</span>
+                        <div className="plant-detail__event-body">
+                          <span className="plant-detail__event-label">{ev.type.charAt(0).toUpperCase() + ev.type.slice(1)}</span>
+                          {ev.note && <span className="plant-detail__event-note">{ev.note}</span>}
+                        </div>
+                        <span className="plant-detail__event-time">{formatEventTime(ev.timestamp)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="plant-detail__events-empty">No events yet. Start by watering!</p>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="plant-detail__photo-locked">
+              <span className="plant-detail__photo-icon">📋</span>
+              <span className="plant-detail__photo-locked-label">Care Log</span>
+              <LockBadge onUnlock={onOpenSubscription} />
+            </div>
           )}
         </div>
 
