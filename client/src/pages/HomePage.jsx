@@ -15,6 +15,7 @@ import PlantDetailModal from '../components/PlantDetailModal';
 import DiseasePanel from '../components/DiseasePanel';
 import DailyTipModal from '../components/DailyTipModal';
 import SubscriptionModal from '../components/SubscriptionModal';
+import StatsModal from '../components/StatsModal';
 import SpeciesPanel from '../components/SpeciesPanel';
 import { PLANT_TIPS } from '../data/tips';
 
@@ -31,7 +32,7 @@ const ACCENT_COLORS = {
 };
 
 export default function HomePage() {
-  const { plants, addPlant, user, setUser, getWaterLevel, settings, setSettings, weather, weatherLoading, weatherError, retryWeather, isDemo } = usePlants();
+  const { plants, addPlant, user, setUser, getWaterLevel, settings, setSettings, getGardenGrade, weather, weatherLoading, weatherError, retryWeather, isDemo } = usePlants();
   const theme = useTimeTheme(settings?.themeOverride ?? null);
   const [showAdd, setShowAdd]           = useState(false);
   const [showProfile, setShowProfile]   = useState(false);
@@ -47,6 +48,7 @@ export default function HomePage() {
   const [titleDraft, setTitleDraft]     = useState('');
   const [showTipModal, setShowTipModal] = useState(false);
   const [showSubscription, setShowSubscription] = useState(false);
+  const [showStats, setShowStats] = useState(false);
   const [learnPlant, setLearnPlant] = useState(null);
   const savedLearnPlant = useRef(null);
   if (learnPlant) savedLearnPlant.current = learnPlant;
@@ -67,6 +69,7 @@ export default function HomePage() {
   const showTipBanner = !loading && settings?.lastTipDate !== today;
 
   const needsWater = plants.filter(p => getWaterLevel(p) < 30).length;
+  const grade = getGardenGrade();
   const avatarModel = MODELS[user.avatarModelIdx ?? 0];
 
   // Resolve accent color from user preference (key or custom hex)
@@ -165,6 +168,16 @@ export default function HomePage() {
             </div>
           )}
         </div>
+
+        {!editingTitle && grade && plants.length > 0 && (
+          <button
+            className="navbar__grade-chip"
+            onClick={() => setShowStats(true)}
+            aria-label={`Garden grade ${grade}, view stats`}
+          >
+            {grade}
+          </button>
+        )}
 
         <WeatherWidget
           weather={weather}
@@ -277,6 +290,7 @@ export default function HomePage() {
         onClose={() => { setShowTipModal(false); dismissTip(); }}
       />
       <SubscriptionModal open={showSubscription}                                   onClose={() => setShowSubscription(false)} />
+      <StatsModal         open={showStats}                                          onClose={() => setShowStats(false)} />
       {savedLearnPlant.current && (
         <SpeciesPanel
           open={!!learnPlant}

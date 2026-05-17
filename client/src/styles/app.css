@@ -2472,3 +2472,199 @@ body[data-glass="light"] .toggle { border-color: rgba(0,0,0,0.16); background: r
   background: rgba(0,0,0,0.03);
   border-left-color: rgba(0,0,0,0.15);
 }
+
+/* ── Navbar grade chip ───────────────────────────── */
+.navbar__grade-chip {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--glass-bg);
+  border: 1.5px solid var(--accent);
+  color: var(--accent);
+  font-size: .82rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--sp-2);
+  transition: transform 150ms var(--ease-spring), background 150ms var(--ease-ios);
+}
+.navbar__grade-chip:hover { transform: scale(1.12); }
+
+/* ── StatsModal ──────────────────────────────────── */
+.stats-modal { max-width: 380px; padding-bottom: var(--sp-5); }
+.stats-modal__body { padding: 0 var(--sp-4) var(--sp-3); display: flex; flex-direction: column; gap: var(--sp-4); }
+
+/* Hero */
+.stats-modal__hero {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: var(--sp-4) 0 var(--sp-2);
+}
+.stats-modal__grade-ring {
+  flex: none;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 3px solid var(--accent);
+  background: var(--glass-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+.stats-modal__grade-letter {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.03em;
+}
+.stats-modal__grade-sub {
+  font-size: .5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--text-muted);
+}
+.stats-modal__kpis {
+  display: flex;
+  gap: var(--sp-3);
+  flex: 1;
+  justify-content: space-around;
+}
+.stats-modal__kpi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.stats-modal__kpi-val {
+  font-size: var(--fs-headline);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+.stats-modal__kpi-label {
+  font-size: var(--fs-caption2);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Section */
+.stats-modal__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.stats-modal__section-title {
+  font-size: var(--fs-caption1);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* 7-day bar chart */
+.stats-modal__chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 72px;
+}
+.stats-modal__bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+.stats-modal__bar-track {
+  flex: 1;
+  width: 100%;
+  background: var(--glass-bg);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+.stats-modal__bar-fill {
+  width: 100%;
+  background: var(--accent);
+  border-radius: 4px;
+  min-height: 0;
+  transition: height 400ms var(--ease-ios);
+  opacity: .85;
+}
+.stats-modal__bar-day {
+  font-size: var(--fs-caption2);
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Health chips */
+.stats-modal__health-chips {
+  display: flex;
+  gap: var(--sp-2);
+}
+.stats-modal__health-chip {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: var(--sp-2) var(--sp-1);
+  border-radius: var(--radius-sm);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+}
+.stats-modal__hc-count {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.stats-modal__hc-label { font-size: var(--fs-caption2); color: var(--text-muted); }
+.stats-modal__health-chip--happy  { border-color: rgba(82,183,136,.35); }
+.stats-modal__health-chip--okay   { border-color: rgba(245,158,11,.30); }
+.stats-modal__health-chip--thirsty { border-color: rgba(239,68,68,.30); }
+.stats-modal__health-chip--happy  .stats-modal__hc-count { color: var(--green); }
+.stats-modal__health-chip--okay   .stats-modal__hc-count { color: var(--amber); }
+.stats-modal__health-chip--thirsty .stats-modal__hc-count { color: var(--red); }
+
+/* Health segment bar */
+.stats-modal__health-bar {
+  display: flex;
+  height: 6px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  gap: 2px;
+}
+.stats-modal__health-seg { border-radius: var(--radius-full); }
+.stats-modal__health-seg--happy   { background: var(--green); }
+.stats-modal__health-seg--okay    { background: var(--amber); }
+.stats-modal__health-seg--thirsty { background: var(--red); }
+
+/* Most cared for */
+.stats-modal__fav {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+}
+.stats-modal__fav-icon { font-size: 1.3rem; }
+.stats-modal__fav-name { display: block; font-size: var(--fs-subheadline); font-weight: 600; }
+.stats-modal__fav-meta { display: block; font-size: var(--fs-caption1); color: var(--text-muted); margin-top: 1px; }
+
+.stats-modal__empty {
+  text-align: center;
+  font-size: var(--fs-footnote);
+  color: var(--text-muted);
+  padding: var(--sp-4) 0;
+}
