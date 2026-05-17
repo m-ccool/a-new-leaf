@@ -65,7 +65,7 @@ function formatEventTime(ts) {
 }
 
 export default function PlantDetailModal({ open, plant: plantProp, onClose, onLearn, onCheckup, onOpenSubscription }) {
-  const { plants, getWaterLevel, getHappyLevel, waterPlant, removePlant, weather, settings, photos, setPlantPhoto, removePlantPhoto, addPlantEvent, getPlantEvents, setPlantReminder, getPlantReminder } = usePlants();
+  const { plants, getWaterLevel, getHappyLevel, waterPlant, removePlant, weather, settings, photos, setPlantPhoto, removePlantPhoto, addPlantEvent, getPlantEvents, setPlantReminder, getPlantReminder, updatePlant } = usePlants();
 
   // Use live plant from context so bars update instantly after watering
   const plant = plants.find(p => p.id === plantProp.id) ?? plantProp;
@@ -102,8 +102,29 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
   const [logOpen, setLogOpen] = useState(false);
   const [calOpen, setCalOpen]   = useState(false);
   const [descOpen, setDescOpen]  = useState(false);
+  const [descEdit, setDescEdit]  = useState(false);
+  const [descDraft, setDescDraft] = useState('');
   const [calMonth, setCalMonth] = useState(new Date().getMonth());
   const currentMonth = new Date().getMonth();
+
+  // Drag-scroll ref for month list
+  const monthsRef  = useRef(null);
+  const monthsDrag = useRef({ active: false, startX: 0, scrollX: 0 });
+
+  function onMonthsDragStart(e) {
+    const el = monthsRef.current; if (!el) return;
+    monthsDrag.current = { active: true, startX: e.pageX - el.offsetLeft, scrollX: el.scrollLeft };
+    el.style.cursor = 'grabbing'; el.style.userSelect = 'none';
+  }
+  function onMonthsDragMove(e) {
+    if (!monthsDrag.current.active) return;
+    const el = monthsRef.current; if (!el) return;
+    el.scrollLeft = monthsDrag.current.scrollX - (e.pageX - el.offsetLeft - monthsDrag.current.startX);
+  }
+  function onMonthsDragEnd() {
+    monthsDrag.current.active = false;
+    if (monthsRef.current) { monthsRef.current.style.cursor = 'grab'; monthsRef.current.style.userSelect = ''; }
+  }
 
   // Water burst particles
   const [bursting, setBursting] = useState(false);
@@ -328,22 +349,51 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
                 {plant.species.water && (
                   <p className="plant-detail__water-note">{plant.species.water}</p>
                 )}
-                {isApiPlant && !apiLoading && apiDetails?.description && (
+                {isApiPlant && !apiLoading && (apiDetails?.description || plant.species?.customDescription) && (
                   <button
                     className={`plant-detail__desc-btn${descOpen ? ' plant-detail__desc-btn--open' : ''}`}
                     onClick={() => setDescOpen(o => !o)}
                     aria-expanded={descOpen}
                     aria-label="About this species"
                   >
-                    📖
+                    📖 <span className="plant-detail__desc-btn-label">About</span>
                   </button>
                 )}
                 {isApiPlant && apiLoading && (
-                  <span className="skeleton skeleton-line plant-detail__desc-skel" style={{ width: 32, height: 32, borderRadius: '50%' }} />
+                  <span className="skeleton skeleton-line plant-detail__desc-skel" style={{ width: 72, height: 28, borderRadius: 8 }} />
                 )}
               </div>
-              {descOpen && apiDetails?.description && (
-                <p className="plant-detail__desc-text">{apiDetails.description}</p>
+              {descOpen && (
+                <div className="plant-detail__desc-body">
+                  {descEdit ? (
+                    <div className="plant-detail__desc-edit">
+                      <textarea
+                        className="plant-detail__desc-textarea"
+                        value={descDraft}
+                        onChange={e => setDescDraft(e.target.value)}
+                        rows={4}
+                        placeholder="Enter species description\u2026"
+                      />
+                      <div className="plant-detail__desc-edit-actions">
+                        <button className="plant-detail__desc-save" onClick={() => {
+                          const val = descDraft.trim();
+                          updatePlant(plant.id, p => ({ ...p, species: { ...p.species, customDescription: val || undefined } }));
+                          setDescEdit(false);
+                        }}>Save</button>
+                        <button className="plant-detail__desc-cancel" onClick={() => { setDescEdit(false); setDescDraft(''); }}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="plant-detail__desc-view">
+                      <p className="plant-detail__desc-text">{plant.species?.customDescription || apiDetails?.description}</p>
+                      <button
+                        className="plant-detail__desc-edit-btn"
+                        onClick={() => { setDescDraft(plant.species?.customDescription || apiDetails?.description || ''); setDescEdit(true); }}
+                        aria-label="Edit description"
+                      >✏️</button>
+                    </div>
+                  )}
+                </div>
               )}
             </>
           )}
@@ -363,7 +413,14 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
                 </button>
               </div>
               <div className={`plant-detail__cal-body${calOpen ? ' plant-detail__cal-body--open' : ''}`}>
-                <div className="plant-detail__months">
+                  <div
+                    className="plant-detail__months"
+                    ref={monthsRef}
+                    onMouseDown={onMonthsDragStart}
+                    onMouseMove={onMonthsDragMove}
+                    onMouseUp={onMonthsDragEnd}
+                    onMouseLeave={onMonthsDragEnd}
+                  >
                   {MONTHS.map((m, i) => (
                     <button
                       key={i}

@@ -97,16 +97,14 @@ export default function PlantCard({ plant, onCardClick, onLearn }) {
             💧 {isOverdue ? 'overdue' : nextLabel}
           </p>
         )}
-        <div className="plant-card__quick-water">
-          <button
-            className="plant-card__water-quick-btn"
-            onClick={e => { e.stopPropagation(); waterPlant(plant.id); }}
-            aria-label={`Water ${plant.nickname}`}
-          >
-            💧
-          </button>
-        </div>
       </div>
+      <button
+        className="plant-card__water-quick-btn"
+        onClick={e => { e.stopPropagation(); waterPlant(plant.id); }}
+        aria-label={`Water ${plant.nickname}`}
+      >
+        💧
+      </button>
     </div>
   );
 }

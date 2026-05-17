@@ -157,6 +157,10 @@ export function PlantProvider({ children }) {
     });
   }
 
+  function updatePlant(id, updater) {
+    setPlants(prev => prev.map(p => p.id === id ? updater(p) : p));
+  }
+
   // Computed water level based on elapsed time since last watering
   function getWaterLevel(plant) {
     const freqMs = (plant.species?.waterFreqDays ?? 7) * 24 * 60 * 60 * 1000;
@@ -211,7 +215,7 @@ export function PlantProvider({ children }) {
   return (
     <PlantContext.Provider
       value={{
-        plants, addPlant, removePlant, waterPlant,
+        plants, addPlant, removePlant, waterPlant, updatePlant,
         getWaterLevel, getHappyLevel, getAge, getGardenGrade,
         user, setUser,
         settings, setSettings,

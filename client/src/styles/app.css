@@ -489,7 +489,8 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
   font-size: .78rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background .15s, transform .12s;
+  opacity: 0.5;
+  transition: background .15s, transform .12s, opacity 200ms var(--ease-ios);
   white-space: nowrap;
   font-family: inherit;
   flex-shrink: 0;
@@ -499,8 +500,8 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
-.weather-chip:hover        { background: rgba(255,255,255,0.20); transform: scale(1.04); }
-.weather-chip--loading     { opacity: .50; cursor: default; }
+.weather-chip:hover        { background: rgba(255,255,255,0.20); transform: scale(1.04); opacity: 1; }
+.weather-chip--loading     { opacity: .25; cursor: default; }
 .weather-chip--locate      { border-color: color-mix(in srgb, var(--accent) 55%, rgba(255,255,255,0.28)); animation: locatePulse 2.4s ease-in-out infinite; }
 @keyframes locatePulse {
   0%,100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 32%, transparent); }
@@ -839,7 +840,7 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
   background: rgba(0,0,0,0.16);
 }
 
-/* Idle shimmer sweep */
+/* Idle shimmer sweep — starts fully off-screen+hidden to avoid flash on load */
 .bottombar__btn--add::after {
   content: '';
   position: absolute;
@@ -847,8 +848,11 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
   bottom: -18%;
   left: -18%;
   width: 52%;
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%);
+  background: linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.55) 50%, transparent 100%);
   pointer-events: none;
+  transform: translateX(-250%) skewX(-22deg);
+  opacity: 0;
+  will-change: transform, opacity;
   animation: fabIdleShimmer 90s ease-in-out 4s infinite;
   border-radius: 50%;
 }
@@ -1725,29 +1729,77 @@ select.modal__input {
   gap: var(--sp-2);
 }
 .plant-detail__desc-btn {
-  width: 34px; height: 34px;
-  border-radius: 50%;
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 10px;
+  border-radius: var(--radius-xs);
   background: rgba(255,255,255,0.09);
   border: 1px solid rgba(255,255,255,0.18);
-  font-size: 1rem;
+  font-size: .9rem;
   cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
   transition: background 150ms var(--ease-ios), transform 120ms var(--ease-spring);
+}
+.plant-detail__desc-btn-label {
+  font-size: var(--fs-caption1);
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
 }
 .plant-detail__desc-btn--open {
   background: rgba(255,255,255,0.18);
   border-color: rgba(255,255,255,0.34);
-  transform: scale(1.08);
 }
-.plant-detail__desc-btn:active { transform: scale(0.90); }
+.plant-detail__desc-btn:active { transform: scale(0.92); }
+.plant-detail__desc-body {
+  padding: 0 var(--sp-4) var(--sp-3);
+  animation: expandBounce 280ms var(--ease-spring) both;
+  transform-origin: top center;
+}
+.plant-detail__desc-view { position: relative; }
 .plant-detail__desc-text {
   font-size: var(--fs-footnote);
   line-height: 1.55;
   color: var(--text-muted);
-  padding: 0 var(--sp-4) var(--sp-3);
   margin: 0;
-  animation: fadeInUp 180ms var(--ease-ios) both;
+  padding-right: var(--sp-5);
+}
+.plant-detail__desc-edit-btn {
+  position: absolute; top: 0; right: 0;
+  background: transparent; border: none; cursor: pointer;
+  font-size: .85rem; opacity: .55;
+  transition: opacity 120ms var(--ease-ios);
+  padding: 2px;
+}
+.plant-detail__desc-edit-btn:hover { opacity: 1; }
+.plant-detail__desc-edit {
+  display: flex; flex-direction: column; gap: var(--sp-2);
+}
+.plant-detail__desc-textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.20);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: var(--fs-footnote);
+  line-height: 1.5;
+  padding: var(--sp-2) var(--sp-3);
+  resize: none;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+.plant-detail__desc-textarea:focus { outline: none; border-color: var(--accent); }
+.plant-detail__desc-edit-actions { display: flex; gap: var(--sp-2); }
+.plant-detail__desc-save {
+  background: var(--accent); color: #fff; border: none;
+  border-radius: var(--radius-sm); padding: .35rem .9rem;
+  font-size: var(--fs-caption1); font-weight: 600; cursor: pointer;
+  transition: opacity 120ms var(--ease-ios);
+}
+.plant-detail__desc-cancel {
+  background: rgba(255,255,255,0.10); color: var(--text);
+  border: 1px solid rgba(255,255,255,0.20);
+  border-radius: var(--radius-sm); padding: .35rem .9rem;
+  font-size: var(--fs-caption1); cursor: pointer;
 }
 .plant-detail__care-skel { width: 52px; height: .8rem; }
 
@@ -1794,8 +1846,9 @@ select.modal__input {
   overflow: hidden;
   max-height: 0;
   transition: max-height 300ms var(--ease-ios);
+  transform-origin: top center;
 }
-.plant-detail__events-body--open { max-height: 440px; }
+.plant-detail__events-body--open { max-height: 440px; animation: expandBounce 300ms var(--ease-spring) both; }
 .plant-detail__events-toggle {
   flex: 1; background: none; border: none; cursor: pointer;
   display: flex; align-items: center; gap: var(--sp-2);
@@ -1867,17 +1920,28 @@ select.modal__input {
 }
 
 /* Seasonal care calendar */
+@keyframes expandBounce {
+  0%   { opacity: .5; transform: scaleY(.95); }
+  55%  { transform: scaleY(1.025); }
+  80%  { transform: scaleY(.99); }
+  100% { opacity: 1; transform: scaleY(1); }
+}
+
 .plant-detail__cal-section { padding: 0 1rem; }
 .plant-detail__cal-body {
   overflow: hidden; max-height: 0;
   transition: max-height 300ms var(--ease-ios);
+  transform-origin: top center;
 }
-.plant-detail__cal-body--open { max-height: 180px; }
+.plant-detail__cal-body--open { max-height: 180px; animation: expandBounce 300ms var(--ease-spring) both; }
 .plant-detail__months {
   display: flex; gap: var(--sp-1);
   padding: var(--sp-2) 0 var(--sp-2);
   overflow-x: auto; scrollbar-width: none;
+  cursor: grab;
+  -webkit-overflow-scrolling: touch;
 }
+.plant-detail__months:active { cursor: grabbing; }
 .plant-detail__months::-webkit-scrollbar { display: none; }
 .plant-detail__month-chip {
   flex: none;
@@ -2782,19 +2846,21 @@ body[data-glass="light"] .toggle { border-color: rgba(0,0,0,0.16); background: r
   animation: fadeInUp 250ms var(--ease-ios) both;
 }
 
-/* PlantCard quick-water button */
-.plant-card__quick-water {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: var(--sp-1);
-}
+/* PlantCard quick-water button — absolute upper-left overlay */
+.plant-card__quick-water { display: none; }
 .plant-card__water-quick-btn {
-  background: rgba(56,189,248,0.12);
-  border: 1px solid rgba(56,189,248,0.25);
-  border-radius: var(--radius-full);
+  position: absolute;
+  top: var(--sp-2);
+  left: var(--sp-2);
+  z-index: 3;
+  background: rgba(0,0,0,0.36);
+  backdrop-filter: blur(10px) saturate(160%);
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  border: 1.5px solid rgba(255,255,255,0.28);
+  border-radius: var(--radius-xs);
   color: var(--text);
-  font-size: .95rem;
-  width: 32px; height: 32px;
+  font-size: .9rem;
+  width: 34px; height: 34px;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: background 150ms var(--ease-ios), transform 120ms var(--ease-spring);
@@ -2821,7 +2887,7 @@ body[data-glass="light"] .toggle { border-color: rgba(0,0,0,0.16); background: r
    ═══════════════════════════════════════════════════════════════════ */
 .plant-detail__water-wrap { position: relative; display: inline-block; }
 
-/* Viewer overlay position */
+/* Viewer overlay water button — square with radius */
 .plant-detail__viewer-water {
   position: absolute;
   top: var(--sp-3);
@@ -2830,7 +2896,7 @@ body[data-glass="light"] .toggle { border-color: rgba(0,0,0,0.16); background: r
 }
 .plant-detail__water-overlay-btn {
   width: 44px; height: 44px;
-  border-radius: 50%;
+  border-radius: var(--radius-xs);
   background: rgba(0,0,0,0.42);
   backdrop-filter: blur(14px) saturate(180%);
   border: 1.5px solid rgba(255,255,255,0.28);
