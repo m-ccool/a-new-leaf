@@ -1616,9 +1616,12 @@ select.modal__input {
 .plant-detail {
   max-width: 420px;
   padding: 0 0 1.5rem;
-  overflow: hidden;
+  /* overflow: hidden removed — was clipping desc/cal/events sections at 90dvh.
+     border-radius clipping is handled by the parent .modal's overflow-y: auto scroll container. */
+  overflow-x: clip;
 }
-/* Close btn must overlay the 3D viewer — restore absolute positioning globally */
+/* Close btn overlays the 3D viewer — position: absolute so it sits on top of viewer,
+   not in sticky flow. Scrolls with modal (acceptable UX for image-header sheets). */
 .plant-detail .modal__close {
   position: absolute;
   margin-left: 0;
