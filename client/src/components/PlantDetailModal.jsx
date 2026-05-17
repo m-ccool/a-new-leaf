@@ -38,8 +38,22 @@ function formatNextWatering(plant) {
   return `next watering: in ${days}d`;
 }
 
+function formatEventTime(ts) {
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(diff / 3600000);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(diff / 86400000);
+  if (days === 1) return 'yesterday';
+  if (days < 30) return `${days}d ago`;
+  const d = new Date(ts);
+  return `${d.toLocaleString('default', { month: 'short' })} ${d.getDate()}`;
+}
+
 export default function PlantDetailModal({ open, plant: plantProp, onClose, onLearn, onCheckup, onOpenSubscription }) {
-  const { plants, getWaterLevel, getHappyLevel, waterPlant, removePlant, weather, settings, photos, setPlantPhoto, removePlantPhoto } = usePlants();
+  const { plants, getWaterLevel, getHappyLevel, waterPlant, removePlant, weather, settings, photos, setPlantPhoto, removePlantPhoto, addPlantEvent, getPlantEvents } = usePlants();
 
   // Use live plant from context so bars update instantly after watering
   const plant = plants.find(p => p.id === plantProp.id) ?? plantProp;
@@ -67,6 +81,11 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
   const photoRef = useRef(null);
   const plantPhoto = photos?.[plant.id] ?? null;
   const isPro = settings?.isPro ?? false;
+
+  // Event log
+  const plantEvents = isPro ? getPlantEvents(plant.id) : [];
+  const [noteInput, setNoteInput] = useState('');
+  const [showNoteInput, setShowNoteInput] = useState(false);
 
   function handlePhotoSelect(e) {
     const file = e.target.files?.[0];
@@ -287,6 +306,62 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
             <div className="plant-detail__photo-locked">
               <span className="plant-detail__photo-icon">📷</span>
               <span className="plant-detail__photo-locked-label">Photo Journal</span>
+              <LockBadge onUnlock={onOpenSubscription} />
+            </div>
+          )}
+        </div>
+
+        {/* Event log — Pro-gated */}
+        <div className="plant-detail__section plant-detail__events-section">
+          {isPro ? (
+            <>
+              <div className="plant-detail__events-header">
+                <span className="plant-detail__events-title">Care Log</span>
+                <div className="plant-detail__events-actions">
+                  <button className="plant-detail__event-btn" onClick={() => addPlantEvent(plant.id, 'repotted')}>🪴 Repotted</button>
+                  <button className="plant-detail__event-btn" onClick={() => addPlantEvent(plant.id, 'fertilized')}>🌿 Fertilized</button>
+                  <button className="plant-detail__event-btn" onClick={() => setShowNoteInput(s => !s)}>📝 Note</button>
+                </div>
+              </div>
+              {showNoteInput && (
+                <div className="plant-detail__note-row">
+                  <input
+                    className="plant-detail__note-input"
+                    value={noteInput}
+                    onChange={e => setNoteInput(e.target.value)}
+                    placeholder="Add a note…"
+                    maxLength={120}
+                  />
+                  <button className="btn btn--primary plant-detail__note-save" onClick={() => {
+                    if (noteInput.trim()) {
+                      addPlantEvent(plant.id, 'noted', noteInput.trim());
+                      setNoteInput('');
+                      setShowNoteInput(false);
+                    }
+                  }}>Save</button>
+                </div>
+              )}
+              {plantEvents.length > 0 ? (
+                <ul className="plant-detail__events-timeline">
+                  {plantEvents.slice(0, 10).map((ev, i) => (
+                    <li key={i} className="plant-detail__event">
+                      <span className="plant-detail__event-icon">{ev.type === 'watered' ? '💧' : ev.type === 'repotted' ? '🪴' : ev.type === 'fertilized' ? '🌿' : '📝'}</span>
+                      <div className="plant-detail__event-body">
+                        <span className="plant-detail__event-label">{ev.type.charAt(0).toUpperCase() + ev.type.slice(1)}</span>
+                        {ev.note && <span className="plant-detail__event-note">{ev.note}</span>}
+                      </div>
+                      <span className="plant-detail__event-time">{formatEventTime(ev.timestamp)}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="plant-detail__events-empty">No events yet. Start by watering!</p>
+              )}
+            </>
+          ) : (
+            <div className="plant-detail__photo-locked">
+              <span className="plant-detail__photo-icon">📋</span>
+              <span className="plant-detail__photo-locked-label">Care Log</span>
               <LockBadge onUnlock={onOpenSubscription} />
             </div>
           )}

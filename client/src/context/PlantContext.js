@@ -78,6 +78,22 @@ export function PlantProvider({ children }) {
     });
   }
 
+  // Plant health event log — { [plantId]: [{ type, timestamp, note? }] }
+  const [events, setEvents] = useLocalStorage('anl_events', {});
+
+  function addPlantEvent(plantId, type, note) {
+    const entry = { type, timestamp: Date.now() };
+    if (note) entry.note = note;
+    setEvents(prev => ({
+      ...prev,
+      [plantId]: [entry, ...(prev[plantId] ?? [])].slice(0, 50),
+    }));
+  }
+
+  function getPlantEvents(plantId) {
+    return events[plantId] ?? [];
+  }
+
   const plants = normalizePlants(plantsRaw);
   const user = normalizeUser(userRaw);
   const settings = normalizeSettings(settingsRaw);
@@ -101,6 +117,8 @@ export function PlantProvider({ children }) {
 
   function removePlant(id) {
     setPlants(prev => prev.filter(p => p.id !== id));
+    setPhotos(prev => { const next = { ...prev }; delete next[id]; return next; });
+    setEvents(prev => { const next = { ...prev }; delete next[id]; return next; });
   }
 
   function waterPlant(id) {
@@ -108,6 +126,7 @@ export function PlantProvider({ children }) {
     setPlants(prev =>
       prev.map(p => (p.id === id ? { ...p, lastWatered: Date.now() } : p))
     );
+    addPlantEvent(id, 'watered');
     // Update streak
     setUser(prev => {
       const lastDay = prev.lastWateredDay;
@@ -180,6 +199,7 @@ export function PlantProvider({ children }) {
         user, setUser,
         settings, setSettings,
         photos, setPlantPhoto, removePlantPhoto,
+        events, addPlantEvent, getPlantEvents,
         weather, weatherLoading, weatherError, retryWeather,
         isDemo,
       }}
