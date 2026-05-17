@@ -2722,6 +2722,17 @@ body[data-glass="light"] .toggle { border-color: rgba(0,0,0,0.16); background: r
 .settings__backup-btns { display: flex; gap: var(--sp-2); }
 .settings__backup-btn { flex: 1; font-size: var(--fs-footnote); padding: .4rem .8rem; }
 
+/* ── Themed scrollbars (webkit + Firefox) ────────── */
+::-webkit-scrollbar              { width: 4px; height: 4px; }
+::-webkit-scrollbar-track        { background: transparent; }
+::-webkit-scrollbar-thumb        { background: rgba(255,255,255,0.16); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover  { background: rgba(255,255,255,0.30); }
+.plant-detail__events-body,
+.stats-modal__body,
+.wq-list,
+.modal-sheet,
+.modal { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.16) transparent; }
+
 /* ═══════════════════════════════════════════════════════════════════
    FEATURE 5 — PLANT PERSONALITY TAGS
    ═══════════════════════════════════════════════════════════════════ */
@@ -2737,6 +2748,25 @@ body[data-glass="light"] .toggle { border-color: rgba(0,0,0,0.16); background: r
   margin-bottom: var(--sp-2);
   animation: fadeInUp 250ms var(--ease-ios) both;
 }
+
+/* PlantCard quick-water button */
+.plant-card__quick-water {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--sp-1);
+}
+.plant-card__water-quick-btn {
+  background: rgba(56,189,248,0.12);
+  border: 1px solid rgba(56,189,248,0.25);
+  border-radius: var(--radius-full);
+  color: var(--text);
+  font-size: .95rem;
+  width: 32px; height: 32px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 150ms var(--ease-ios), transform 120ms var(--ease-spring);
+}
+.plant-card__water-quick-btn:active { transform: scale(0.88); }
 
 /* ═══════════════════════════════════════════════════════════════════
    FEATURE 2 — HAPPINESS PULSE GLOW
@@ -2757,6 +2787,31 @@ body[data-glass="light"] .toggle { border-color: rgba(0,0,0,0.16); background: r
    FEATURE 1 — WATER BURST PARTICLES
    ═══════════════════════════════════════════════════════════════════ */
 .plant-detail__water-wrap { position: relative; display: inline-block; }
+
+/* Viewer overlay position */
+.plant-detail__viewer-water {
+  position: absolute;
+  top: var(--sp-3);
+  left: var(--sp-3);
+  z-index: 2;
+}
+.plant-detail__water-overlay-btn {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.42);
+  backdrop-filter: blur(14px) saturate(180%);
+  border: 1.5px solid rgba(255,255,255,0.28);
+  color: var(--text);
+  font-size: 1.35rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 150ms var(--ease-ios), transform 120ms var(--ease-spring);
+}
+.plant-detail__water-overlay-btn:hover {
+  background: rgba(0,0,0,0.62);
+  transform: scale(1.10);
+}
+.plant-detail__water-overlay-btn:active { transform: scale(0.92); }
 .water-burst {
   position: absolute;
   inset: 0;
@@ -2917,6 +2972,18 @@ body[data-glass="light"] .toggle { border-color: rgba(0,0,0,0.16); background: r
 }
 .wq-lock-label { font-size: var(--fs-caption1); color: var(--text-muted); }
 .wq-empty { text-align: center; font-size: var(--fs-footnote); color: var(--text-muted); padding: var(--sp-4) 0; }
+
+/* Inline lock row inside StatsModal queue */
+.stats-wq-list { display: flex; flex-direction: column; gap: var(--sp-2); }
+.wq-locked-inline {
+  display: flex; align-items: center; gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  position: relative;
+}
+.wq-locked-inline .wq-lock-label { font-size: var(--fs-caption1); color: var(--text-muted); margin: 0; }
 
 /* ═══════════════════════════════════════════════════════════════════
    FEATURE 6 — GARDEN SHARE CARD

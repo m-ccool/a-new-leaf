@@ -18,7 +18,6 @@ import SubscriptionModal from '../components/SubscriptionModal';
 import StatsModal from '../components/StatsModal';
 import SpeciesPanel from '../components/SpeciesPanel';
 import StreakToast from '../components/StreakToast';
-import WaterQueueModal from '../components/WaterQueueModal';
 import { PLANT_TIPS } from '../data/tips';
 
 const SKELETON_COUNT = 4;
@@ -51,7 +50,6 @@ export default function HomePage() {
   const [showTipModal, setShowTipModal] = useState(false);
   const [showSubscription, setShowSubscription] = useState(false);
   const [showStats, setShowStats] = useState(false);
-  const [showQueue, setShowQueue] = useState(false);
   const [learnPlant, setLearnPlant] = useState(null);
   const savedLearnPlant = useRef(null);
   if (learnPlant) savedLearnPlant.current = learnPlant;
@@ -92,10 +90,6 @@ export default function HomePage() {
 
   const needsWater = plants.filter(p => getWaterLevel(p) < 30).length;
   const grade = getGardenGrade();
-  const overdueCount = plants.filter(p => {
-    const freqMs = (p.species?.waterFreqDays ?? 7) * 86400000;
-    return (Date.now() - (p.lastWatered ?? 0)) > freqMs;
-  }).length;
   const avatarModel = MODELS[user.avatarModelIdx ?? 0];
 
   // Resolve accent color from user preference (key or custom hex)
@@ -202,19 +196,6 @@ export default function HomePage() {
             aria-label={`Garden grade ${grade}, view stats`}
           >
             {grade}
-          </button>
-        )}
-
-        {plants.length > 0 && (
-          <button
-            className={`navbar__queue-btn${overdueCount > 0 ? ' navbar__queue-btn--urgent' : ''}`}
-            onClick={() => setShowQueue(true)}
-            aria-label={`Water queue${overdueCount > 0 ? `, ${overdueCount} overdue` : ''}`}
-          >
-            💧
-            {overdueCount > 0 && (
-              <span className="navbar__queue-badge">{overdueCount}</span>
-            )}
           </button>
         )}
 
@@ -330,11 +311,6 @@ export default function HomePage() {
       />
       <SubscriptionModal open={showSubscription}                                   onClose={() => setShowSubscription(false)} />
       <StatsModal         open={showStats}  onClose={() => setShowStats(false)} onOpenSubscription={() => { setShowStats(false); setShowSubscription(true); }} />
-      <WaterQueueModal
-        open={showQueue}
-        onClose={() => setShowQueue(false)}
-        onOpenSubscription={() => { setShowQueue(false); setShowSubscription(true); }}
-      />
       {streakToast && (
         <StreakToast milestone={streakToast} onDismiss={() => setStreakToast(null)} />
       )}

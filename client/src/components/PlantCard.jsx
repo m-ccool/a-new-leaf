@@ -36,7 +36,7 @@ function statusDotClass(pct) {
 }
 
 export default function PlantCard({ plant, onCardClick, onLearn }) {
-  const { getWaterLevel, getHappyLevel } = usePlants();
+  const { getWaterLevel, getHappyLevel, waterPlant } = usePlants();
   const waterPct = Math.round(getWaterLevel(plant));
   const happyPct = Math.round(getHappyLevel(plant));
 
@@ -97,6 +97,15 @@ export default function PlantCard({ plant, onCardClick, onLearn }) {
             💧 {isOverdue ? 'overdue' : nextLabel}
           </p>
         )}
+        <div className="plant-card__quick-water">
+          <button
+            className="plant-card__water-quick-btn"
+            onClick={e => { e.stopPropagation(); waterPlant(plant.id); }}
+            aria-label={`Water ${plant.nickname}`}
+          >
+            💧
+          </button>
+        </div>
       </div>
     </div>
   );

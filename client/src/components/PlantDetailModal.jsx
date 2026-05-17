@@ -192,6 +192,22 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
         {/* 3D model — full-bleed transparent window */}
         <div className="plant-detail__viewer">
           <PlantViewer modelUrl={plant.species.model} height={300} />
+          <div className="plant-detail__water-wrap plant-detail__viewer-water">
+            <button className="plant-detail__water-overlay-btn" onClick={handleWater} aria-label="Water plant">
+              💧
+            </button>
+            {bursting && (
+              <div className="water-burst" aria-hidden="true">
+                {BURST_PARTICLES.map((p, i) => (
+                  <span
+                    key={i}
+                    className="burst-particle"
+                    style={{ '--tx': `${p.tx}px`, '--ty': `${p.ty}px`, animationDelay: `${p.delay}ms` }}
+                  >{p.emoji}</span>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Identity — photo avatar floated right for Pro users */}
@@ -452,22 +468,6 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
 
         {/* Actions */}
         <div className="plant-detail__actions">
-          <div className="plant-detail__water-wrap">
-            <button className="btn btn--primary plant-detail__water-btn" onClick={handleWater}>
-              💧 Water Now
-            </button>
-            {bursting && (
-              <div className="water-burst" aria-hidden="true">
-                {BURST_PARTICLES.map((p, i) => (
-                  <span
-                    key={i}
-                    className="burst-particle"
-                    style={{ '--tx': `${p.tx}px`, '--ty': `${p.ty}px`, animationDelay: `${p.delay}ms` }}
-                  >{p.emoji}</span>
-                ))}
-              </div>
-            )}
-          </div>
           {onCheckup && (
             <button className="btn plant-detail__checkup-btn" onClick={() => { onCheckup(plant); onClose(); }}>
               🩺 Checkup

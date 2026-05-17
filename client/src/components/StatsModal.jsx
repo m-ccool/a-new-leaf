@@ -1,8 +1,24 @@
+import { useState } from 'react';
 import { Dialog, DialogPanel } from '@headlessui/react';
 import { usePlants } from '../context/PlantContext';
 import ShareCard from './ShareCard';
+import LockBadge from './LockBadge';
 
 const DAY_INITIALS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+function urgencyScore(plant, temp) {
+  const freq    = plant.species?.waterFreqDays ?? 7;
+  const elapsed = (Date.now() - (plant.lastWatered ?? 0)) / 86400000;
+  let score = (elapsed - freq) / freq;
+  if (temp != null && temp > 80) score *= 1.15;
+  return score;
+}
+
+function urgencyLabel(score) {
+  if (score >= 0.5) return { text: 'Overdue',   cls: 'wq-row__badge--red' };
+  if (score >= 0)   return { text: 'Due today', cls: 'wq-row__badge--amber' };
+  return                   { text: 'Upcoming',  cls: 'wq-row__badge--green' };
+}
 
 function gradeColor(grade) {
   return grade === 'A' ? 'var(--green)'
@@ -13,7 +29,17 @@ function gradeColor(grade) {
 }
 
 export default function StatsModal({ open, onClose, onOpenSubscription }) {
-  const { plants, getHappyLevel, user, events, getGardenGrade } = usePlants();
+  const { plants, getHappyLevel, user, events, getGardenGrade, waterPlant, settings, weather } = usePlants();
+  const isPro = settings?.isPro ?? false;
+  const temp  = weather?.temp ?? null;
+
+  // Water queue state
+  const [watered, setWatered] = useState(new Set());
+
+  function handleWater(plantId) {
+    waterPlant(plantId);
+    setWatered(prev => new Set(prev).add(plantId));
+  }
 
   const grade  = getGardenGrade();
   const streak = user?.streak ?? 0;
@@ -145,6 +171,47 @@ export default function StatsModal({ open, onClose, onOpenSubscription }) {
           {plants.length === 0 && (
             <p className="stats-modal__empty">Add plants to start tracking your garden stats.</p>
           )}
+
+          {/* Water Queue — inline, Pro gate shows 1 free */}
+          {plants.length > 0 && (() => {
+            const sorted = [...plants]
+              .map(p => ({ plant: p, score: urgencyScore(p, temp) }))
+              .sort((a, b) => b.score - a.score);
+            const visible = isPro ? sorted : sorted.slice(0, 1);
+            const locked  = isPro ? [] : sorted.slice(1);
+            return (
+              <div className="stats-modal__section">
+                <p className="stats-modal__section-title">💧 Water Queue</p>
+                <div className="stats-wq-list">
+                  {visible.map(({ plant, score }) => {
+                    const done = watered.has(plant.id);
+                    const { text, cls } = urgencyLabel(score);
+                    return (
+                      <div key={plant.id} className={`wq-row${done ? ' wq-row--done' : ''}`}>
+                        <div className="wq-row__info">
+                          <p className="wq-row__name">{plant.nickname}</p>
+                          <p className="wq-row__species">{plant.species?.name}</p>
+                        </div>
+                        <span className={`wq-row__badge ${cls}`}>{text}</span>
+                        <button
+                          className="btn btn--primary wq-row__btn"
+                          onClick={() => handleWater(plant.id)}
+                          disabled={done}
+                          aria-label={`Water ${plant.nickname}`}
+                        >{done ? '\u2713' : '\uD83D\uDCA7'}</button>
+                      </div>
+                    );
+                  })}
+                  {locked.length > 0 && (
+                    <div className="wq-locked-inline">
+                      <LockBadge onUnlock={onOpenSubscription} />
+                      <p className="wq-lock-label">Pro unlocks full queue ({locked.length} more)</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Share Card — Pro-gated */}
           <ShareCard open={open} onOpenSubscription={onOpenSubscription} />
