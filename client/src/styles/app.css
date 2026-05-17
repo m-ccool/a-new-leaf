@@ -918,6 +918,7 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
   max-height: 90dvh;
   overflow-y: auto;
   position: relative;
+  will-change: transform;
   /* Transition handled by Headless UI Dialog data attributes */
   transition: transform 0.36s var(--ease-spring, cubic-bezier(.34,1.56,.64,1)),
               opacity 0.24s ease;
@@ -978,16 +979,17 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
 .modal--wide { max-width: 560px; }
 .modal__close {
   position: sticky; top: .875rem;
-  float: right;
+  margin-left: auto;
   margin-bottom: -44px;
-  background: rgba(120,120,128,0.28); border: none; border-radius: 50%;
+  background: rgba(60,60,70,0.52); border: none; border-radius: 50%;
   width: 30px; height: 30px;
   display: flex; align-items: center; justify-content: center;
   padding: 0; cursor: pointer;
-  color: rgba(235,235,245,0.85);
-  transition: background .15s, transform .12s;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  color: rgba(235,235,245,0.92);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.18);
+  transition: background .15s, transform .12s, box-shadow .15s;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
   z-index: 20;
   touch-action: manipulation;
 }
@@ -996,8 +998,8 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
   position: absolute;
   inset: -7px; /* extends tap target to 44px */
 }
-.modal__close:hover  { background: rgba(120,120,128,0.46); transform: scale(1.05); }
-.modal__close:active { background: rgba(120,120,128,0.62); transform: scale(0.95); }
+.modal__close:hover  { background: rgba(80,80,95,0.72); box-shadow: 0 2px 12px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.22); transform: scale(1.05); }
+.modal__close:active { background: rgba(100,100,115,0.80); transform: scale(0.95); }
 .modal__title { font-size: 1.15rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: -.015em; color: var(--text); padding-bottom: .75rem; border-bottom: 0.5px solid var(--glass-border); }
 .modal__preview {
   border-radius: calc(var(--radius) - .25rem); overflow: hidden;
@@ -1062,7 +1064,8 @@ select.modal__input {
   /* plant-detail is zero-top-padding — close btn overlays the 3D viewer, must stay absolute */
   .plant-detail .modal__close {
     position: absolute;
-    float: none;
+    margin-left: 0;
+    margin-bottom: 0;
     top: .75rem;
     right: .75rem;
     background: rgba(0,0,0,0.35);
@@ -1614,6 +1617,14 @@ select.modal__input {
   max-width: 420px;
   padding: 0 0 1.5rem;
   overflow: hidden;
+}
+/* Close btn must overlay the 3D viewer — restore absolute positioning globally */
+.plant-detail .modal__close {
+  position: absolute;
+  margin-left: 0;
+  margin-bottom: 0;
+  top: .875rem;
+  right: .875rem;
 }
 
 /* Full-bleed transparent viewer */
