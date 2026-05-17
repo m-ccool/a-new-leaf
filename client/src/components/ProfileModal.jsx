@@ -3,6 +3,7 @@ import { Dialog, DialogPanel } from '@headlessui/react';
 import { usePlants } from '../context/PlantContext';
 import { MODELS } from '../hooks/usePlantAPI';
 import PlantViewer from './PlantViewer';
+import LockBadge from './LockBadge';
 
 const ACCENTS = [
   { key: 'green',  color: '#52b788', label: 'Leaf' },
@@ -14,7 +15,8 @@ const ACCENTS = [
 ];
 
 export default function ProfileModal({ open, onClose }) {
-  const { plants, user, setUser, getWaterLevel, getGardenGrade } = usePlants();
+  const { plants, user, setUser, getWaterLevel, getGardenGrade, settings } = usePlants();
+  const isPro = settings?.isPro ?? false;
   const [name, setName] = useState(user.name);
   const [bio, setBio] = useState(user.bio);
   const [modelIdx, setModelIdx] = useState(user.avatarModelIdx ?? 0);
@@ -118,29 +120,37 @@ export default function ProfileModal({ open, onClose }) {
                   title={a.label}
                 />
               ))}
-              {/* Custom color "+" button */}
-              <button
-                type="button"
-                ref={btnRef}
-                className={`profile__accent-add${accent.startsWith('#') ? ' profile__accent-add--active' : ''}`}
-                style={accent.startsWith('#') ? { background: accent, borderStyle: 'solid', borderColor: 'rgba(255,255,255,0.80)' } : {}}
-                onClick={() => setShowColorPicker(v => !v)}
-                aria-label="Custom color"
-                title="Custom color"
-              >
-                {accent.startsWith('#') ? <span style={{ color: '#fff', fontSize: '.8rem', lineHeight: 1 }}>✓</span> : '+'}
-              </button>
-              {showColorPicker && (
-                <div className="accent-picker-popup" ref={pickerRef}>
-                  <input
-                    type="color"
-                    value={customColor}
-                    onChange={e => { setCustomColor(e.target.value); setAccent(e.target.value); }}
-                    className="accent-picker-input"
-                    aria-label="Pick custom accent color"
-                  />
-                  <span className="accent-picker-label">Custom color</span>
-                  <button type="button" className="accent-picker-done" onClick={() => setShowColorPicker(false)}>Done</button>
+              {/* Custom hex color — Pro only */}
+              {isPro ? (
+                <>
+                  <button
+                    type="button"
+                    ref={btnRef}
+                    className={`profile__accent-add${accent.startsWith('#') ? ' profile__accent-add--active' : ''}`}
+                    style={accent.startsWith('#') ? { background: accent, borderStyle: 'solid', borderColor: 'rgba(255,255,255,0.80)' } : {}}
+                    onClick={() => setShowColorPicker(v => !v)}
+                    aria-label="Custom color"
+                    title="Custom color"
+                  >
+                    {accent.startsWith('#') ? <span style={{ color: '#fff', fontSize: '.8rem', lineHeight: 1 }}>✓</span> : '+'}
+                  </button>
+                  {showColorPicker && (
+                    <div className="accent-picker-popup" ref={pickerRef}>
+                      <input
+                        type="color"
+                        value={customColor}
+                        onChange={e => { setCustomColor(e.target.value); setAccent(e.target.value); }}
+                        className="accent-picker-input"
+                        aria-label="Pick custom accent color"
+                      />
+                      <span className="accent-picker-label">Custom color</span>
+                      <button type="button" className="accent-picker-done" onClick={() => setShowColorPicker(false)}>Done</button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="profile__accent-lock">
+                  <LockBadge onUnlock={() => {}} />
                 </div>
               )}
             </div>

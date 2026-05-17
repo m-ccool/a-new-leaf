@@ -65,7 +65,7 @@ function formatEventTime(ts) {
 }
 
 export default function PlantDetailModal({ open, plant: plantProp, onClose, onLearn, onCheckup, onOpenSubscription }) {
-  const { plants, getWaterLevel, getHappyLevel, waterPlant, removePlant, weather, settings, photos, setPlantPhoto, removePlantPhoto, addPlantEvent, getPlantEvents } = usePlants();
+  const { plants, getWaterLevel, getHappyLevel, waterPlant, removePlant, weather, settings, photos, setPlantPhoto, removePlantPhoto, addPlantEvent, getPlantEvents, setPlantReminder, getPlantReminder } = usePlants();
 
   // Use live plant from context so bars update instantly after watering
   const plant = plants.find(p => p.id === plantProp.id) ?? plantProp;
@@ -96,6 +96,7 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
 
   // Event log
   const plantEvents = isPro ? getPlantEvents(plant.id) : [];
+  const reminderTime = isPro ? getPlantReminder(plant.id) : null;
   const [noteInput, setNoteInput] = useState('');
   const [showNoteInput, setShowNoteInput] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
@@ -404,6 +405,31 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
             <div className="plant-detail__photo-locked">
               <span className="plant-detail__photo-icon">📋</span>
               <span className="plant-detail__photo-locked-label">Care Log</span>
+              <LockBadge onUnlock={onOpenSubscription} />
+            </div>
+          )}
+        </div>
+
+        {/* Reminder scheduling — Pro-gated */}
+        <div className="plant-detail__section plant-detail__reminder-section">
+          {isPro ? (
+            <div className="plant-detail__reminder-row">
+              <div>
+                <p className="plant-detail__reminder-label">⏰ Daily Reminder</p>
+                <p className="plant-detail__reminder-sub">{reminderTime ? `Scheduled at ${reminderTime}` : 'No reminder set'}</p>
+              </div>
+              <input
+                type="time"
+                className="plant-detail__reminder-input"
+                value={reminderTime ?? ''}
+                onChange={e => setPlantReminder(plant.id, e.target.value || null)}
+                aria-label="Watering reminder time"
+              />
+            </div>
+          ) : (
+            <div className="plant-detail__photo-locked">
+              <span className="plant-detail__photo-icon">⏰</span>
+              <span className="plant-detail__photo-locked-label">Daily Reminder</span>
               <LockBadge onUnlock={onOpenSubscription} />
             </div>
           )}

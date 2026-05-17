@@ -1,4 +1,6 @@
+import { useRef } from 'react';
 import { Dialog, DialogPanel, Switch } from '@headlessui/react';
+import LockBadge from './LockBadge';
 import { usePlants } from '../context/PlantContext';
 import { THEME_LIST, THEMES, useTimeTheme } from '../hooks/useTimeTheme';
 
@@ -7,6 +9,8 @@ import { THEME_LIST, THEMES, useTimeTheme } from '../hooks/useTimeTheme';
 
 export default function SettingsModal({ open, onClose, onUpgrade }) {
   const { settings, setSettings } = usePlants();
+  const importRef = useRef(null);
+  const isPro = settings?.isPro ?? false;
   const autoTheme = useTimeTheme(null);
 
   function toggle(key) {
@@ -15,6 +19,42 @@ export default function SettingsModal({ open, onClose, onUpgrade }) {
 
   function setThemeOverride(t) {
     setSettings(prev => ({ ...prev, themeOverride: t }));
+  }
+
+  function exportBackup() {
+    const keys = ['anl_plants_v2', 'anl_user', 'anl_settings', 'anl_photos', 'anl_events', 'anl_reminders'];
+    const data = {};
+    keys.forEach(k => {
+      const v = localStorage.getItem(k);
+      if (v !== null) { try { data[k] = JSON.parse(v); } catch {} }
+    });
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = `a-new-leaf-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function handleImport(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+      try {
+        const data = JSON.parse(evt.target.result);
+        const allowed = ['anl_plants_v2', 'anl_user', 'anl_settings', 'anl_photos', 'anl_events', 'anl_reminders'];
+        allowed.forEach(k => {
+          if (data[k] !== undefined) localStorage.setItem(k, JSON.stringify(data[k]));
+        });
+        window.location.reload();
+      } catch {
+        alert('Invalid backup file.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   }
 
   const currentOverride = settings.themeOverride ?? null;
@@ -99,6 +139,27 @@ export default function SettingsModal({ open, onClose, onUpgrade }) {
         <div className="settings__about">
           <p>🌿 A New Leaf</p>
           <p className="settings__version">v0.2.0 — Local build</p>
+        </div>
+
+        {/* Backup & Restore — Pro */}
+        <div className="settings__backup-section">
+          <div className="settings__row settings__row--col">
+            <div>
+              <p className="settings__row-title">☁️ Backup &amp; Restore</p>
+              <p className="settings__row-sub">Export or import your full garden data</p>
+            </div>
+            {isPro ? (
+              <div className="settings__backup-btns">
+                <button className="btn btn--ghost settings__backup-btn" onClick={exportBackup}>↓ Export</button>
+                <button className="btn btn--ghost settings__backup-btn" onClick={() => importRef.current?.click()}>↑ Import</button>
+                <input ref={importRef} type="file" accept=".json" style={{ display: 'none' }} onChange={handleImport} />
+              </div>
+            ) : (
+              <div style={{ position: 'relative', width: 72 }}>
+                <LockBadge onUnlock={() => { onClose(); onUpgrade?.(); }} />
+              </div>
+            )}
+          </div>
         </div>
       </DialogPanel>
     </Dialog>

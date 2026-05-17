@@ -94,6 +94,22 @@ export function PlantProvider({ children }) {
     return events[plantId] ?? [];
   }
 
+  // Per-plant reminder times — { [plantId]: 'HH:MM' | null }
+  const [reminders, setReminders] = useLocalStorage('anl_reminders', {});
+
+  function setPlantReminder(plantId, time) {
+    setReminders(prev => {
+      const next = { ...prev };
+      if (time) next[plantId] = time;
+      else delete next[plantId];
+      return next;
+    });
+  }
+
+  function getPlantReminder(plantId) {
+    return reminders[plantId] ?? null;
+  }
+
   const plants = normalizePlants(plantsRaw);
   const user = normalizeUser(userRaw);
   const settings = normalizeSettings(settingsRaw);
@@ -200,6 +216,7 @@ export function PlantProvider({ children }) {
         settings, setSettings,
         photos, setPlantPhoto, removePlantPhoto,
         events, addPlantEvent, getPlantEvents,
+        reminders, setPlantReminder, getPlantReminder,
         weather, weatherLoading, weatherError, retryWeather,
         isDemo,
       }}

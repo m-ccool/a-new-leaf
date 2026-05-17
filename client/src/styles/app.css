@@ -1224,6 +1224,13 @@ select.modal__input {
 }
 .profile__accent-add--active::after { display: none; }
 
+/* Pro lock placeholder in accent row */
+.profile__accent-lock {
+  width: 34px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+
 /* Color picker popup */
 .accent-picker-popup {
   position: absolute;
@@ -2489,9 +2496,10 @@ body[data-glass="light"] .toggle { border-color: rgba(0,0,0,0.16); background: r
   align-items: center;
   justify-content: center;
   margin-right: var(--sp-2);
-  transition: transform 150ms var(--ease-spring), background 150ms var(--ease-ios);
+  opacity: .5;
+  transition: transform 150ms var(--ease-spring), opacity 200ms var(--ease-ios), background 150ms var(--ease-ios);
 }
-.navbar__grade-chip:hover { transform: scale(1.12); }
+.navbar__grade-chip:hover { transform: scale(1.12); opacity: 1; }
 
 /* ── StatsModal ──────────────────────────────────── */
 .stats-modal { max-width: 380px; padding-bottom: var(--sp-5); }
@@ -2668,3 +2676,48 @@ body[data-glass="light"] .toggle { border-color: rgba(0,0,0,0.16); background: r
   color: var(--text-muted);
   padding: var(--sp-4) 0;
 }
+
+/* ── Reminder section (PlantDetailModal) ─────────── */
+.plant-detail__reminder-section { padding: 0 1rem; }
+.plant-detail__reminder-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-2) 0;
+  gap: var(--sp-3);
+}
+.plant-detail__reminder-label {
+  font-size: var(--fs-subheadline);
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+.plant-detail__reminder-sub {
+  font-size: var(--fs-caption1);
+  color: var(--text-muted);
+  margin: 2px 0 0;
+}
+.plant-detail__reminder-input {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: var(--fs-callout);
+  font-weight: 600;
+  padding: .35rem .6rem;
+  cursor: pointer;
+  outline: none;
+  color-scheme: dark;
+  transition: border-color 150ms var(--ease-ios);
+}
+.plant-detail__reminder-input:focus { border-color: var(--accent); }
+
+/* ── Settings backup section ─────────────────────── */
+.settings__backup-section {
+  padding: .5rem 0 0;
+  border-top: 1px solid var(--glass-border);
+  margin-top: .25rem;
+}
+.settings__row--col { flex-direction: column; align-items: flex-start; gap: var(--sp-2); }
+.settings__backup-btns { display: flex; gap: var(--sp-2); }
+.settings__backup-btn { flex: 1; font-size: var(--fs-footnote); padding: .4rem .8rem; }
