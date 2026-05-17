@@ -183,15 +183,18 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
   const nextLabel   = formatNextWatering(plant);
   const isOverdue   = nextLabel === 'overdue';
 
-  // Fetch live details from Perenual for API-sourced plants (id starts with "api-")
-  const isApiPlant = hasApiKey &&
-    typeof plant.species.id === 'string' && plant.species.id.startsWith('api-');
+  // Fetch Perenual details for API-sourced plants AND local species that have a perenualId
+  const isApiPlant = hasApiKey && (
+    (typeof plant.species.id === 'string' && plant.species.id.startsWith('api-')) ||
+    !!plant.species.perenualId
+  );
   const [apiDetails, setApiDetails] = useState(null);
   const [apiLoading, setApiLoading] = useState(isApiPlant);
 
   useEffect(() => {
     if (!isApiPlant) return;
-    const numericId = parseInt(plant.species.id.replace('api-', ''), 10);
+    const numericId = plant.species.perenualId ||
+      (typeof plant.species.id === 'string' ? parseInt(plant.species.id.replace('api-', ''), 10) : null);
     if (!numericId) { setApiLoading(false); return; }
     let cancelled = false;
     getSpeciesDetails(numericId).then(data => {
@@ -201,7 +204,7 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
       }
     });
     return () => { cancelled = true; };
-  }, [plant.species.id, isApiPlant]);
+  }, [plant.species.id, plant.species.perenualId, isApiPlant]);
 
   return (
     <Dialog open={open} onClose={onClose} transition className="modal-overlay plant-detail-overlay">
