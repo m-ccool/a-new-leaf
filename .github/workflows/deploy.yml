@@ -1,12 +1,14 @@
 name: Deploy to GitHub Pages
 
 on:
+  push:
+    branches: [dev]
   workflow_dispatch:
     inputs:
       source_ref:
         description: Git ref (branch, tag, or commit SHA) to build and deploy
         required: true
-        default: main
+        default: dev
 
 permissions:
   contents: read
@@ -24,7 +26,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.source_ref }}
+          ref: ${{ inputs.source_ref || github.ref_name }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
