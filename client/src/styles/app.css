@@ -1045,8 +1045,8 @@ select.modal__input {
   .modal:not(.modal--center) {
     border-radius: 1.25rem 1.25rem 0 0;
     border-bottom: none;
-    max-width: 100%;
-    width: 100%;
+    max-width: 90%;
+    width: 90%;
     /* Slide-up via Dialog data attributes */
     padding-bottom: max(env(safe-area-inset-bottom, 0px), 1.75rem);
   }
@@ -1063,7 +1063,6 @@ select.modal__input {
   .plant-detail .modal__close {
     position: absolute;
     float: none;
-    margin-bottom: 0;
     top: .75rem;
     right: .75rem;
     background: rgba(0,0,0,0.35);
@@ -1991,7 +1990,7 @@ select.modal__input {
 .plant-detail__actions {
   display: flex;
   gap: .35rem;
-  padding: .45rem .9rem 0;
+  padding: .45rem .9rem;
   flex-wrap: wrap;
 }
 /* Water btn takes remaining space; others are fixed-content */
