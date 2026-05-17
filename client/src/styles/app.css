@@ -648,7 +648,7 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
   border-radius: 1rem;
   position: relative;
   overflow: hidden;
-  transition: width .65s cubic-bezier(.4,0,.2,1);
+  transition: width .65s var(--ease-spring);
   transform-origin: left center;
 }
 /* Specular shine on bars */
@@ -2846,7 +2846,7 @@ body[data-glass="light"] .toggle { border-color: rgba(0,0,0,0.16); background: r
   animation: fadeInUp 250ms var(--ease-ios) both;
 }
 
-/* PlantCard quick-water button — absolute upper-left overlay */
+/* PlantCard quick-water button — absolute upper-left overlay, fades in on card hover */
 .plant-card__quick-water { display: none; }
 .plant-card__water-quick-btn {
   position: absolute;
@@ -2863,9 +2863,15 @@ body[data-glass="light"] .toggle { border-color: rgba(0,0,0,0.16); background: r
   width: 34px; height: 34px;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  transition: background 150ms var(--ease-ios), transform 120ms var(--ease-spring);
+  opacity: 0;
+  transition: background 150ms var(--ease-ios), transform 120ms var(--ease-spring), opacity 180ms var(--ease-ios);
 }
+.plant-card:hover .plant-card__water-quick-btn { opacity: 1; }
 .plant-card__water-quick-btn:active { transform: scale(0.88); }
+/* Always visible on touch-primary devices */
+@media (hover: none) {
+  .plant-card__water-quick-btn { opacity: 0.75; }
+}
 
 /* ═══════════════════════════════════════════════════════════════════
    FEATURE 2 — HAPPINESS PULSE GLOW

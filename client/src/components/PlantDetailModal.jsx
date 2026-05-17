@@ -342,14 +342,15 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
           </div>
 
           {/* Water note + description book toggle */}
-          {(plant.species.water || isApiPlant) && (
+          {(plant.species.water || isApiPlant || plant.species?.customDescription) && (
             <>
               <div className="plant-detail__divider" />
               <div className="plant-detail__desc-row">
                 {plant.species.water && (
                   <p className="plant-detail__water-note">{plant.species.water}</p>
                 )}
-                {isApiPlant && !apiLoading && (apiDetails?.description || plant.species?.customDescription) && (
+                {/* Show About btn if there’s content; show Add note btn if there’s nothing yet */}
+                {!apiLoading && (apiDetails?.description || plant.species?.customDescription) ? (
                   <button
                     className={`plant-detail__desc-btn${descOpen ? ' plant-detail__desc-btn--open' : ''}`}
                     onClick={() => setDescOpen(o => !o)}
@@ -357,6 +358,14 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
                     aria-label="About this species"
                   >
                     📖 <span className="plant-detail__desc-btn-label">About</span>
+                  </button>
+                ) : !apiLoading && (
+                  <button
+                    className="plant-detail__desc-btn"
+                    onClick={() => { setDescDraft(''); setDescEdit(true); setDescOpen(true); }}
+                    aria-label="Add a note"
+                  >
+                    📝 <span className="plant-detail__desc-btn-label">Add note</span>
                   </button>
                 )}
                 {isApiPlant && apiLoading && (
