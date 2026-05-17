@@ -914,7 +914,7 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
   box-shadow: var(--modal-shadow);
   padding: 1.5rem 1.25rem 1.75rem;
   width: 100%;
-  max-width: 480px;
+  max-width: 420px;
   max-height: 90dvh;
   overflow-y: auto;
   position: relative;
@@ -962,9 +962,24 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
   pointer-events: none;
   border-radius: 1px;
 }
+/* Bottom fade — scroll hint when modal overflows */
+.modal::after {
+  content: '';
+  display: block;
+  position: sticky;
+  bottom: 0;
+  height: 3rem;
+  background: linear-gradient(to top, var(--modal-glass-bg, rgba(14,22,38,0.90)) 0%, transparent 100%);
+  pointer-events: none;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  margin-top: -3rem;
+  z-index: 1;
+}
 .modal--wide { max-width: 560px; }
 .modal__close {
-  position: absolute; top: .875rem; right: .875rem;
+  position: sticky; top: .875rem;
+  float: right;
+  margin-bottom: -44px;
   background: rgba(120,120,128,0.28); border: none; border-radius: 50%;
   width: 30px; height: 30px;
   display: flex; align-items: center; justify-content: center;
@@ -1044,8 +1059,11 @@ select.modal__input {
   .modal:not(.modal--center)::before {
     left: 12%; right: 12%;
   }
-  /* plant-detail is zero-top-padding — close btn floats over viewer */
+  /* plant-detail is zero-top-padding — close btn overlays the 3D viewer, must stay absolute */
   .plant-detail .modal__close {
+    position: absolute;
+    float: none;
+    margin-bottom: 0;
     top: .75rem;
     right: .75rem;
     background: rgba(0,0,0,0.35);
@@ -2398,7 +2416,7 @@ body[data-glass="light"] .toggle { border-color: rgba(0,0,0,0.16); background: r
 
 /* ── Disease Panel ───────────────────────────────────── */
 .disease-panel {
-  max-width: 440px;
+  max-width: 420px;
   padding: 1.25rem 1.25rem 1.5rem;
   display: flex;
   flex-direction: column;
@@ -2596,7 +2614,7 @@ body[data-glass="light"] .toggle { border-color: rgba(0,0,0,0.16); background: r
 .navbar__grade-chip:hover { transform: scale(1.12); opacity: 1; }
 
 /* ── StatsModal ──────────────────────────────────── */
-.stats-modal { max-width: 380px; padding-bottom: var(--sp-5); }
+.stats-modal { max-width: 420px; padding-bottom: var(--sp-5); }
 .stats-modal__body { padding: 0 var(--sp-4) var(--sp-3); display: flex; flex-direction: column; gap: var(--sp-4); }
 
 /* Hero */
