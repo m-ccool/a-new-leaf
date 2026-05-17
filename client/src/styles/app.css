@@ -891,7 +891,7 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   z-index: 200;
   /* Transition handled by Headless UI Dialog data attributes */
