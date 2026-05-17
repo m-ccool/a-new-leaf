@@ -461,7 +461,7 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
                   className={`plant-detail__events-toggle${logOpen ? ' plant-detail__events-toggle--open' : ''}`}
                   onClick={() => setLogOpen(o => !o)}
                 >
-                  <span className="plant-detail__events-title">Care Log</span>
+                  <span className="plant-detail__events-title">Log</span>
                   <span className="plant-detail__events-chevron">›</span>
                 </button>
                 <div className="plant-detail__events-actions">
@@ -510,7 +510,7 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
           ) : (
             <div className="plant-detail__photo-locked">
               <span className="plant-detail__photo-icon">📋</span>
-              <span className="plant-detail__photo-locked-label">Care Log</span>
+              <span className="plant-detail__photo-locked-label">Log</span>
               <LockBadge onUnlock={onOpenSubscription} />
             </div>
           )}
