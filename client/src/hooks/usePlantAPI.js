@@ -79,3 +79,18 @@ export function modelForId(id) {
   const num = typeof id === 'number' ? id : parseInt(String(id).replace(/\D/g, ''), 10) || 0;
   return MODELS[num % MODELS.length];
 }
+
+// Auto-generated personality tag based on species care profile.
+// Priority: toxic → water extremes → light → default.
+export function getPlantPersonality(species) {
+  if (!species) return { emoji: '\uD83C\uDF3F', label: 'Classic Green' };
+  if (species.toxic) return { emoji: '\u26A0\uFE0F', label: 'Handle With Care' };
+  const water = species.water ?? '';
+  if (water === 'Minimum' || water === 'Low') return { emoji: '\uD83D\uDE0E', label: 'Low Key' };
+  if (water === 'Frequent') return { emoji: '\uD83D\uDCA6', label: 'Thirsty' };
+  if (water === 'High') return { emoji: '\uD83C\uDF0A', label: 'Water Baby' };
+  const light = (species.light ?? '').toLowerCase();
+  if (light.includes('full sun')) return { emoji: '\u2600\uFE0F', label: 'Sun Chaser' };
+  if (light.includes('shade')) return { emoji: '\uD83C\uDF11', label: 'Shade Dweller' };
+  return { emoji: '\uD83C\uDF3F', label: 'Classic Green' };
+}

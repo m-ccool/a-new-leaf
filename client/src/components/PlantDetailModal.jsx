@@ -104,6 +104,19 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
   const [calMonth, setCalMonth] = useState(new Date().getMonth());
   const currentMonth = new Date().getMonth();
 
+  // Water burst particles
+  const [bursting, setBursting] = useState(false);
+  const BURST_PARTICLES = Array.from({ length: 10 }, (_, i) => {
+    const angle = (i / 10) * 2 * Math.PI + (Math.random() * 0.6);
+    const dist  = 36 + Math.random() * 44;
+    return {
+      tx: Math.round(Math.cos(angle) * dist),
+      ty: Math.round(Math.sin(angle) * dist),
+      delay: Math.round(Math.random() * 80),
+      emoji: i % 2 === 0 ? '\uD83D\uDCA7' : '\uD83C\uDF3F',
+    };
+  });
+
   function handlePhotoSelect(e) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -134,6 +147,8 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
 
   function handleWater() {
     waterPlant(plant.id);
+    setBursting(true);
+    setTimeout(() => setBursting(false), 720);
   }
 
   function handleDelete() {
@@ -437,9 +452,22 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
 
         {/* Actions */}
         <div className="plant-detail__actions">
-          <button className="btn btn--primary plant-detail__water-btn" onClick={handleWater}>
-            💧 Water Now
-          </button>
+          <div className="plant-detail__water-wrap">
+            <button className="btn btn--primary plant-detail__water-btn" onClick={handleWater}>
+              💧 Water Now
+            </button>
+            {bursting && (
+              <div className="water-burst" aria-hidden="true">
+                {BURST_PARTICLES.map((p, i) => (
+                  <span
+                    key={i}
+                    className="burst-particle"
+                    style={{ '--tx': `${p.tx}px`, '--ty': `${p.ty}px`, animationDelay: `${p.delay}ms` }}
+                  >{p.emoji}</span>
+                ))}
+              </div>
+            )}
+          </div>
           {onCheckup && (
             <button className="btn plant-detail__checkup-btn" onClick={() => { onCheckup(plant); onClose(); }}>
               🩺 Checkup

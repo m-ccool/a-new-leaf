@@ -19,6 +19,7 @@ const DEFAULT_SETTINGS = {
   themeOverride: null,
   isPro: false,
   lastTipDate: null,
+  lastStreakMilestone: 0,
 };
 
 const DEMO_PLANTS = [

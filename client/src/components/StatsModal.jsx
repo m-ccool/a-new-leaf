@@ -1,5 +1,6 @@
 import { Dialog, DialogPanel } from '@headlessui/react';
 import { usePlants } from '../context/PlantContext';
+import ShareCard from './ShareCard';
 
 const DAY_INITIALS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
@@ -11,7 +12,7 @@ function gradeColor(grade) {
     : 'var(--red)';
 }
 
-export default function StatsModal({ open, onClose }) {
+export default function StatsModal({ open, onClose, onOpenSubscription }) {
   const { plants, getHappyLevel, user, events, getGardenGrade } = usePlants();
 
   const grade  = getGardenGrade();
@@ -144,6 +145,9 @@ export default function StatsModal({ open, onClose }) {
           {plants.length === 0 && (
             <p className="stats-modal__empty">Add plants to start tracking your garden stats.</p>
           )}
+
+          {/* Share Card — Pro-gated */}
+          <ShareCard open={open} onOpenSubscription={onOpenSubscription} />
         </div>
       </DialogPanel>
     </Dialog>

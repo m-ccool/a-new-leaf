@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, Suspense } from 'react';
 import PlantViewer from './PlantViewer';
 import { usePlants } from '../context/PlantContext';
+import { getPlantPersonality } from '../hooks/usePlantAPI';
 
 function formatNextWatering(plant) {
   if (!plant.lastWatered) return null;
@@ -53,9 +54,11 @@ export default function PlantCard({ plant, onCardClick, onLearn }) {
 
   const nextLabel = formatNextWatering(plant);
   const isOverdue = nextLabel === 'overdue';
+  const mood = happyPct > 70 ? 'happy' : happyPct < 35 ? 'sad' : 'ok';
+  const personality = getPlantPersonality(plant.species);
 
   return (
-    <div className="plant-card" onClick={() => onCardClick(plant)}>
+    <div className="plant-card" data-mood={mood} onClick={() => onCardClick(plant)}>
       <div className="plant-card__model">
         <span className={`plant-card__status-dot ${statusDotClass(waterPct)}`} />
         <Suspense fallback={<div className="skeleton skeleton-model" />}>
@@ -72,6 +75,7 @@ export default function PlantCard({ plant, onCardClick, onLearn }) {
 
       <div className="plant-card__info">
         <h3 className="plant-card__name">{plant.nickname}</h3>
+        <span className="plant-card__personality">{personality.emoji} {personality.label}</span>
 
         <div className="plant-card__bars">
           <div className={`plant-card__bar-track${overfill ? ' plant-card__bar-track--overfill' : ''}`}>
