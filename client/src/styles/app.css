@@ -728,20 +728,16 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
 }
 /* Glass pill containing the nav tabs */
 .bottombar__pill {
-  --pill-pad-y: .3rem;
-  --pill-pad-x: .4rem;
-  --pill-gap: .2rem;
-  --pill-tab-width: 80px;
   display: flex;
   align-items: center;
-  gap: var(--pill-gap);
+  gap: .2rem;
   background: rgba(10,10,18,0.58);
   backdrop-filter: blur(60px) saturate(260%);
   -webkit-backdrop-filter: blur(60px) saturate(260%);
   border: 1px solid rgba(255,255,255,0.20);
   border-top: 1px solid rgba(255,255,255,0.32);
   border-radius: 100px;
-  padding: var(--pill-pad-y) var(--pill-pad-x);
+  padding: .3rem .4rem;
   box-shadow: 0 16px 48px rgba(0,0,0,0.40),
               0 4px 14px rgba(0,0,0,0.24),
               inset 0 1.5px 0 rgba(255,255,255,0.22),
@@ -752,10 +748,9 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
 /* Sliding active indicator — fixed width so slider never re-calcs on hover reflow */
 .bottombar__pill__slider {
   position: absolute;
-  top: var(--pill-pad-y);
-  bottom: var(--pill-pad-y);
-  left: var(--pill-pad-x);
-  width: var(--pill-tab-width);
+  top: .3rem; bottom: .3rem;
+  left: .4rem;
+  width: 80px;
   background: rgba(255,255,255,0.14);
   border-radius: 100px;
   pointer-events: none;
@@ -777,10 +772,10 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
 }
 .bottombar__pill__slider--right {
   transform: translateX(calc(var(--pill-tab-width) + var(--pill-gap)));
+  transform: translateX(calc(100% + .2rem)); /* 100% = fixed 80px, always stable */
 }
 /* Lock pill buttons to fixed width — prevents pill reflow from invalidating slider */
 .bottombar__pill .bottombar__btn {
-  width: var(--pill-tab-width);
   flex: none;
 }
 .bottombar__btn {
