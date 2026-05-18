@@ -1449,10 +1449,11 @@ select.modal__input {
   color: var(--text-muted);
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.species-panel__desc--expanded { -webkit-line-clamp: unset; overflow: visible; }
+.species-panel__desc--expanded { -webkit-line-clamp: unset; line-clamp: unset; overflow: visible; }
 .species-panel__expand {
   background: none;
   border: none;
@@ -1611,8 +1612,6 @@ select.modal__input {
 .btn--ghost:hover { background: rgba(255,255,255,0.20); }
 
 /* ══ Plant Detail Modal ══════════════════════════════ */
-.plant-detail-overlay { }
-
 .plant-detail {
   max-width: 420px;
   padding: 0 0 1.5rem;
@@ -1679,6 +1678,8 @@ select.modal__input {
 .plant-detail__photo-avatar:hover { border-color: var(--accent); transform: scale(1.04); }
 .plant-detail__avatar-img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .plant-detail__avatar-placeholder { font-size: 1.4rem; opacity: .55; pointer-events: none; }
+.plant-detail__photo-avatar--locked { opacity: .40; }
+.plant-detail__avatar-lock { position: absolute; bottom: -2px; right: -3px; font-size: .6rem; line-height: 1; pointer-events: none; }
 .plant-detail__avatar-remove {
   position: absolute; top: -3px; right: -3px;
   width: 17px; height: 17px;
@@ -2026,6 +2027,8 @@ select.modal__input {
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
 }
 .plant-detail__checkup-btn:hover { background: rgba(245,158,11,0.28); }
+.plant-detail__checkup-btn--locked { opacity: .45; }
+.plant-detail__checkup-btn--locked:hover { background: rgba(245,158,11,0.16); }
 .plant-detail__learn-btn {
   flex: none;
   background: rgba(56,189,248,0.14);

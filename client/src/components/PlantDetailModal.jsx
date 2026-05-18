@@ -206,6 +206,19 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
     return () => { cancelled = true; };
   }, [plant.species.id, plant.species.perenualId, isApiPlant]);
 
+  // Reset expanded sections when modal closes (prevents state leakage across plants)
+  useEffect(() => {
+    if (!open) {
+      setDescOpen(false);
+      setDescEdit(false);
+      setDescDraft('');
+      setLogOpen(false);
+      setCalOpen(false);
+      setShowNoteInput(false);
+      setNoteInput('');
+    }
+  }, [open]);
+
   return (
     <Dialog open={open} onClose={onClose} transition className="modal-overlay plant-detail-overlay">
       <DialogPanel className="modal plant-detail">
@@ -252,7 +265,7 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
               <p className="plant-card__toxic">⚠️ Toxic to cats &amp; dogs</p>
             )}
           </div>
-          {isPro && (
+          {isPro ? (
             <button className="plant-detail__photo-avatar" onClick={() => photoRef.current?.click()} aria-label="Plant photo">
               {plantPhoto
                 ? <img className="plant-detail__avatar-img" src={plantPhoto.dataUrl} alt={plant.nickname} />
@@ -266,6 +279,16 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
                   onClick={e => { e.stopPropagation(); removePlantPhoto(plant.id); }}
                 >×</span>
               )}
+            </button>
+          ) : (
+            <button
+              className="plant-detail__photo-avatar plant-detail__photo-avatar--locked"
+              onClick={onOpenSubscription}
+              aria-label="Photo journal — upgrade to Pro"
+              title="Unlock with Pro"
+            >
+              <span className="plant-detail__avatar-placeholder">📷</span>
+              <span className="plant-detail__avatar-lock">🔒</span>
             </button>
           )}
         </div>
@@ -452,7 +475,7 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
                   className={`plant-detail__events-toggle${logOpen ? ' plant-detail__events-toggle--open' : ''}`}
                   onClick={() => setLogOpen(o => !o)}
                 >
-                  <span className="plant-detail__events-title">Log</span>
+                  <span className="plant-detail__events-title">📋 Plant Log</span>
                   <span className="plant-detail__events-chevron">›</span>
                 </button>
                 <div className="plant-detail__events-actions">
@@ -535,9 +558,15 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
         {/* Actions */}
         <div className="plant-detail__actions">
           {onCheckup && (
-            <button className="btn plant-detail__checkup-btn" onClick={() => { onCheckup(plant); onClose(); }}>
-              🩺 Checkup
-            </button>
+            isPro ? (
+              <button className="btn plant-detail__checkup-btn" onClick={() => { onCheckup(plant); onClose(); }}>
+                🩺 Checkup
+              </button>
+            ) : (
+              <button className="btn plant-detail__checkup-btn plant-detail__checkup-btn--locked" onClick={onOpenSubscription}>
+                🩺 Checkup 🔒
+              </button>
+            )
           )}
           {onLearn && plant.species?.perenualId && (
             <button className="btn plant-detail__learn-btn" onClick={() => { onLearn(plant); onClose(); }}>
