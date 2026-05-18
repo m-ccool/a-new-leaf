@@ -1629,6 +1629,15 @@ select.modal__input {
   top: .875rem;
   right: .875rem;
 }
+/* Add-plant modal — absolute close btn prevents sticky+will-change compositing
+   glitch during the slide-up enter animation */
+.add-plant .modal__close {
+  position: absolute;
+  margin-left: 0;
+  margin-bottom: 0;
+  top: .875rem;
+  right: .875rem;
+}
 
 /* Full-bleed transparent viewer */
 .plant-detail__viewer {

@@ -344,61 +344,59 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
             )}
           </div>
 
-          {/* Water note + bio section */}
-          {(plant.species.water || isApiPlant || plant.species?.customDescription) && (
-            <>
-              <div className="plant-detail__divider" />
-              <div className="plant-detail__desc-row">
-                {plant.species.water && (
-                  <p className="plant-detail__water-note">{plant.species.water}</p>
-                )}
-                {isApiPlant && apiLoading ? (
-                  <span className="skeleton skeleton-line plant-detail__desc-skel" style={{ width: 72, height: 28, borderRadius: 8 }} />
-                ) : (isApiPlant || plant.species?.customDescription) && (
-                  <button
-                    className={`plant-detail__desc-btn${descOpen ? ' plant-detail__desc-btn--open' : ''}`}
-                    onClick={() => setDescOpen(o => !o)}
-                    aria-expanded={descOpen}
-                    aria-label="About this species"
-                  >
-                    📖 <span className="plant-detail__desc-btn-label">About</span>
-                  </button>
+          {/* Water note + bio section — always shown so any plant can have a custom note */}
+          <>
+            <div className="plant-detail__divider" />
+            <div className="plant-detail__desc-row">
+              {plant.species.water && (
+                <p className="plant-detail__water-note">{plant.species.water}</p>
+              )}
+              {isApiPlant && apiLoading ? (
+                <span className="skeleton skeleton-line plant-detail__desc-skel" style={{ width: 72, height: 28, borderRadius: 8 }} />
+              ) : (
+                <button
+                  className={`plant-detail__desc-btn${descOpen ? ' plant-detail__desc-btn--open' : ''}`}
+                  onClick={() => setDescOpen(o => !o)}
+                  aria-expanded={descOpen}
+                  aria-label="About this species"
+                >
+                  📖 <span className="plant-detail__desc-btn-label">About</span>
+                </button>
+              )}
+            </div>
+            {descOpen && (
+              <div className="plant-detail__desc-body">
+                {descEdit ? (
+                  <div className="plant-detail__desc-edit">
+                    <textarea
+                      className="plant-detail__desc-textarea"
+                      value={descDraft}
+                      onChange={e => setDescDraft(e.target.value)}
+                      rows={4}
+                      placeholder="Enter species description\u2026"
+                    />
+                    <div className="plant-detail__desc-edit-actions">
+                      <button className="plant-detail__desc-save" onClick={() => {
+                        const val = descDraft.trim();
+                        updatePlant(plant.id, p => ({ ...p, species: { ...p.species, customDescription: val || undefined } }));
+                        setDescEdit(false);
+                      }}>Save</button>
+                      <button className="plant-detail__desc-cancel" onClick={() => { setDescEdit(false); setDescDraft(''); }}>Cancel</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="plant-detail__desc-view">
+                    <p className="plant-detail__desc-text">{plant.species?.customDescription || apiDetails?.description || ''}</p>
+                    <button
+                      className="plant-detail__desc-edit-btn"
+                      onClick={() => { setDescDraft(plant.species?.customDescription || apiDetails?.description || ''); setDescEdit(true); }}
+                      aria-label="Edit description"
+                    >✏️</button>
+                  </div>
                 )}
               </div>
-              {descOpen && (
-                <div className="plant-detail__desc-body">
-                  {descEdit ? (
-                    <div className="plant-detail__desc-edit">
-                      <textarea
-                        className="plant-detail__desc-textarea"
-                        value={descDraft}
-                        onChange={e => setDescDraft(e.target.value)}
-                        rows={4}
-                        placeholder="Enter species description\u2026"
-                      />
-                      <div className="plant-detail__desc-edit-actions">
-                        <button className="plant-detail__desc-save" onClick={() => {
-                          const val = descDraft.trim();
-                          updatePlant(plant.id, p => ({ ...p, species: { ...p.species, customDescription: val || undefined } }));
-                          setDescEdit(false);
-                        }}>Save</button>
-                        <button className="plant-detail__desc-cancel" onClick={() => { setDescEdit(false); setDescDraft(''); }}>Cancel</button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="plant-detail__desc-view">
-                      <p className="plant-detail__desc-text">{plant.species?.customDescription || apiDetails?.description}</p>
-                      <button
-                        className="plant-detail__desc-edit-btn"
-                        onClick={() => { setDescDraft(plant.species?.customDescription || apiDetails?.description || ''); setDescEdit(true); }}
-                        aria-label="Edit description"
-                      >✏️</button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </>
-          )}
+            )}
+          </>
         </div>
 
         {/* Seasonal care calendar — Pro-gated */}

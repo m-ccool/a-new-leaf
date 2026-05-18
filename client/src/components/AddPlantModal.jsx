@@ -11,6 +11,15 @@ export default function AddPlantModal({ open, onAdd, onClose }) {
   // Local fallback state
   const [localSpeciesId, setLocalSpeciesId] = useState(SPECIES[0].id);
 
+  const nicknameRef = useRef(null);
+  // Delay focus until after the slide-up animation completes (prevents
+  // mobile keyboard from popping during the CSS transition).
+  useEffect(() => {
+    if (!open) return;
+    const t = setTimeout(() => nicknameRef.current?.focus(), 380);
+    return () => clearTimeout(t);
+  }, [open]);
+
   // API search state
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
@@ -73,7 +82,7 @@ export default function AddPlantModal({ open, onAdd, onClose }) {
 
   return (
     <Dialog open={open} onClose={onClose} transition className="modal-overlay">
-      <DialogPanel className="modal">
+      <DialogPanel className="modal add-plant">
         <div className="sheet-handle" aria-hidden="true" />
         <button className="modal__close" onClick={onClose} aria-label="Close">
           <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><path d="M1 1l9 9M10 1L1 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
@@ -109,7 +118,7 @@ export default function AddPlantModal({ open, onAdd, onClose }) {
               onChange={e => setNickname(e.target.value)}
               placeholder="e.g. Hercules"
               maxLength={30}
-              autoFocus
+              ref={nicknameRef}
             />
           </label>
 

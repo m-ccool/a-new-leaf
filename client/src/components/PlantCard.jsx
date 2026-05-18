@@ -64,13 +64,6 @@ export default function PlantCard({ plant, onCardClick, onLearn }) {
         <Suspense fallback={<div className="skeleton skeleton-model" />}>
           <PlantViewer modelUrl={plant.species.model} height={180} />
         </Suspense>
-        {onLearn && (
-          <button
-            className="plant-card__learn-btn"
-            onClick={e => { e.stopPropagation(); onLearn(plant); }}
-            aria-label={`Learn more about ${plant.species.name}`}
-          >📖</button>
-        )}
       </div>
 
       <div className="plant-card__info">
