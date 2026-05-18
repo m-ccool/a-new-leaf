@@ -344,7 +344,7 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
             )}
           </div>
 
-          {/* Water note + description book toggle */}
+          {/* Water note + bio section */}
           {(plant.species.water || isApiPlant || plant.species?.customDescription) && (
             <>
               <div className="plant-detail__divider" />
@@ -352,8 +352,9 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
                 {plant.species.water && (
                   <p className="plant-detail__water-note">{plant.species.water}</p>
                 )}
-                {/* Show About btn if there’s content; show Add note btn if there’s nothing yet */}
-                {!apiLoading && (apiDetails?.description || plant.species?.customDescription) ? (
+                {isApiPlant && apiLoading ? (
+                  <span className="skeleton skeleton-line plant-detail__desc-skel" style={{ width: 72, height: 28, borderRadius: 8 }} />
+                ) : (isApiPlant || plant.species?.customDescription) && (
                   <button
                     className={`plant-detail__desc-btn${descOpen ? ' plant-detail__desc-btn--open' : ''}`}
                     onClick={() => setDescOpen(o => !o)}
@@ -362,17 +363,6 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
                   >
                     📖 <span className="plant-detail__desc-btn-label">About</span>
                   </button>
-                ) : !apiLoading && (
-                  <button
-                    className="plant-detail__desc-btn"
-                    onClick={() => { setDescDraft(''); setDescEdit(true); setDescOpen(true); }}
-                    aria-label="Add a note"
-                  >
-                    📝 <span className="plant-detail__desc-btn-label">Add note</span>
-                  </button>
-                )}
-                {isApiPlant && apiLoading && (
-                  <span className="skeleton skeleton-line plant-detail__desc-skel" style={{ width: 72, height: 28, borderRadius: 8 }} />
                 )}
               </div>
               {descOpen && (
