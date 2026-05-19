@@ -458,6 +458,8 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
   overflow: visible;
   padding: 0;
   flex-shrink: 0;
+  position: relative;
+  z-index: 2;
   /* Push avatar ring toward bottom of navbar so canvas has viewport headroom above */
   align-self: flex-end;
   padding-bottom: 8px;
@@ -1911,7 +1913,7 @@ select.modal__input {
 .plant-detail__events-actions { display: flex; gap: var(--sp-2); }
 .plant-detail__event-btn {
   font-size: var(--fs-caption1); font-weight: var(--fw-headline);
-  padding: var(--sp-1) var(--sp-2);
+  padding: 3px var(--sp-2);
   background: var(--glass-bg); border: 1px solid var(--glass-border);
   border-radius: var(--radius-xs); color: var(--text); cursor: pointer;
   transition: background 180ms var(--ease-ios);
@@ -2382,6 +2384,99 @@ body[data-glass="light"] .toggle { border-color: rgba(0,0,0,0.16); background: r
 .app[data-glass="light"] .plant-detail__water-note {
   background: rgba(0,0,0,0.04);
   border-color: rgba(0,0,0,0.09);
+}
+
+/* Light mode — plant detail modal: prevent sky bleed (purple-square issue) */
+body[data-glass="light"] .plant-detail {
+  background: rgba(240,246,250,0.94);
+}
+body[data-glass="light"] .plant-detail__viewer {
+  background: rgba(195,220,245,0.18);
+}
+body[data-glass="light"] .plant-detail__viewer::after {
+  background: linear-gradient(to top, rgba(240,246,250,0.55) 0%, transparent 100%);
+}
+/* Light mode — section cards: more visible frosted glass */
+body[data-glass="light"] .plant-detail__section {
+  background: rgba(255,255,255,0.52);
+  border-color: rgba(0,0,0,0.07);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.80), 0 2px 8px rgba(0,0,0,0.04);
+}
+/* Light mode — section divider */
+body[data-glass="light"] .plant-detail__divider {
+  background: rgba(0,0,0,0.07);
+}
+/* Light mode — description toggle button */
+body[data-glass="light"] .plant-detail__desc-btn {
+  background: rgba(0,0,0,0.06);
+  border-color: rgba(0,0,0,0.12);
+}
+body[data-glass="light"] .plant-detail__desc-btn--open {
+  background: rgba(0,0,0,0.10);
+  border-color: rgba(0,0,0,0.18);
+}
+/* Light mode — event action buttons (Repotted / Fertilized / Note) */
+body[data-glass="light"] .plant-detail__event-btn {
+  background: rgba(0,0,0,0.06);
+  border-color: rgba(0,0,0,0.12);
+  color: rgba(8,20,10,0.82);
+}
+body[data-glass="light"] .plant-detail__event-btn:hover {
+  background: rgba(0,0,0,0.11);
+}
+/* Light mode — event log entries */
+body[data-glass="light"] .plant-detail__event {
+  background: rgba(0,0,0,0.04);
+  border-color: rgba(0,0,0,0.08);
+}
+/* Light mode — note input */
+body[data-glass="light"] .plant-detail__note-input {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.12);
+  color: rgba(8,20,10,0.88);
+}
+body[data-glass="light"] .plant-detail__note-input::placeholder {
+  color: rgba(8,20,10,0.38);
+}
+/* Light mode — description textarea */
+body[data-glass="light"] .plant-detail__desc-textarea {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.14);
+  color: rgba(8,20,10,0.88);
+}
+/* Light mode — reminder time input */
+body[data-glass="light"] .plant-detail__reminder-input {
+  color-scheme: light;
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.12);
+}
+/* Light mode — month calendar chips */
+body[data-glass="light"] .plant-detail__month-chip {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.10);
+}
+/* Light mode — photo upload zone */
+body[data-glass="light"] .plant-detail__photo-add {
+  border-color: rgba(0,0,0,0.14);
+}
+/* Light mode — navbar grade chip: fully visible, strong contrast */
+.app[data-glass="light"] .navbar__grade-chip {
+  background: rgba(255,255,255,0.72);
+  border-color: var(--accent);
+  opacity: 1;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.10);
+}
+/* Light mode — weather chip: full opacity */
+.app[data-glass="light"] .weather-chip {
+  opacity: 0.9;
+}
+/* Light mode — daily tip banner */
+.app[data-glass="light"] .daily-tip-banner {
+  background: rgba(255,255,255,0.60);
+  border-color: rgba(0,0,0,0.08);
+}
+.app[data-glass="light"] .daily-tip-banner:hover {
+  background: rgba(255,255,255,0.80);
 }
 /* Light mode — cards use dark text via CSS var inheritance */
 
@@ -2936,8 +3031,8 @@ body[data-glass="light"] .toggle { border-color: rgba(0,0,0,0.16); background: r
 /* Viewer overlay water button — square with radius */
 .plant-detail__viewer-water {
   position: absolute;
-  top: var(--sp-3);
-  left: var(--sp-3);
+  bottom: var(--sp-4);
+  right: var(--sp-4);
   z-index: 2;
 }
 .plant-detail__water-overlay-btn {

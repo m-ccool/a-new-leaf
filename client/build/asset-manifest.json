@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/a-new-leaf/static/css/main.2e034bce.css",
-    "main.js": "/a-new-leaf/static/js/main.46a9a64a.js",
+    "main.css": "/a-new-leaf/static/css/main.9026fdd5.css",
+    "main.js": "/a-new-leaf/static/js/main.46ee8d38.js",
     "static/js/206.9fb1f232.chunk.js": "/a-new-leaf/static/js/206.9fb1f232.chunk.js",
     "service-worker.js": "/a-new-leaf/service-worker.js",
     "index.html": "/a-new-leaf/index.html"
   },
   "entrypoints": [
-    "static/css/main.2e034bce.css",
-    "static/js/main.46a9a64a.js"
+    "static/css/main.9026fdd5.css",
+    "static/js/main.46ee8d38.js"
   ]
 }
