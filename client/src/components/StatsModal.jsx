@@ -57,13 +57,21 @@ export default function StatsModal({ open, onClose, onOpenSubscription }) {
   const okay    = plants.filter(p => { const h = getHappyLevel(p); return h >= 30 && h < 60; }).length;
   const thirsty = plants.filter(p => getHappyLevel(p) < 30).length;
 
-  // Last 7 days watering activity
+  // Last 7 days watering activity — primary: events log; fallback: lastWatered timestamps
   const allWaterEvents = Object.values(events).flat().filter(e => e.type === 'watered');
   const last7 = Array(7).fill(0);
-  allWaterEvents.forEach(e => {
-    const daysAgo = Math.floor((Date.now() - e.timestamp) / 86400000);
-    if (daysAgo >= 0 && daysAgo < 7) last7[6 - daysAgo]++;
-  });
+  if (allWaterEvents.length > 0) {
+    allWaterEvents.forEach(e => {
+      const daysAgo = Math.floor((Date.now() - e.timestamp) / 86400000);
+      if (daysAgo >= 0 && daysAgo < 7) last7[6 - daysAgo]++;
+    });
+  } else {
+    plants.forEach(p => {
+      if (!p.lastWatered) return;
+      const daysAgo = Math.floor((Date.now() - p.lastWatered) / 86400000);
+      if (daysAgo >= 0 && daysAgo < 7) last7[6 - daysAgo]++;
+    });
+  }
   const maxBars = Math.max(...last7, 1);
 
   const dayLabels = Array.from({ length: 7 }, (_, i) => {
@@ -114,17 +122,22 @@ export default function StatsModal({ open, onClose, onOpenSubscription }) {
           <div className="stats-modal__section">
             <p className="stats-modal__section-title">Watering — last 7 days</p>
             <div className="stats-modal__chart">
-              {last7.map((count, i) => (
-                <div key={i} className="stats-modal__bar-col">
-                  <div className="stats-modal__bar-track">
-                    <div
-                      className="stats-modal__bar-fill"
-                      style={{ height: `${Math.max(count / maxBars, count > 0 ? 0.1 : 0) * 100}%` }}
-                    />
+              {last7.map((count, i) => {
+                const isFull = plants.length > 0 && count >= plants.length;
+                return (
+                  <div key={i} className="stats-modal__bar-col">
+                    <div className="stats-modal__bar-track">
+                      <div
+                        className={`stats-modal__bar-fill${isFull ? ' stats-modal__bar-fill--full' : ''}`}
+                        style={{ height: `${Math.max(count / maxBars, count > 0 ? 0.12 : 0) * 100}%` }}
+                      />
+                    </div>
+                    <span className={`stats-modal__bar-day${i === 6 ? ' stats-modal__bar-day--today' : ''}`}>
+                      {dayLabels[i]}
+                    </span>
                   </div>
-                  <span className="stats-modal__bar-day">{dayLabels[i]}</span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

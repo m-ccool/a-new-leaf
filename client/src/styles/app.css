@@ -889,9 +889,9 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
 /* ══ Modals — Liquid Glass ════════════════════════════ */
 .modal-overlay {
   position: fixed; inset: 0;
-  background: rgba(4,8,16,0.40);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: transparent;
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -964,19 +964,6 @@ p  { font-size: var(--fs-body, 17px); line-height: 1.5; }
     transparent 100%);
   pointer-events: none;
   border-radius: 1px;
-}
-/* Bottom fade — scroll hint when modal overflows */
-.modal::after {
-  content: '';
-  display: block;
-  position: sticky;
-  bottom: 0;
-  height: 3rem;
-  background: linear-gradient(to top, var(--modal-glass-bg, rgba(14,22,38,0.90)) 0%, transparent 100%);
-  pointer-events: none;
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-  margin-top: -3rem;
-  z-index: 1;
 }
 .modal--wide { max-width: 560px; }
 .modal__close {
@@ -2742,7 +2729,7 @@ body[data-glass="light"] .plant-detail__photo-add {
   display: flex;
   align-items: center;
   gap: var(--sp-4);
-  padding: var(--sp-4) 0 var(--sp-2);
+  padding: var(--sp-5) 0 var(--sp-3);
 }
 .stats-modal__grade-ring {
   flex: none;
@@ -2780,7 +2767,7 @@ body[data-glass="light"] .plant-detail__photo-add {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: var(--sp-1);
 }
 .stats-modal__kpi-val {
   font-size: var(--fs-headline);
@@ -2798,7 +2785,7 @@ body[data-glass="light"] .plant-detail__photo-add {
 .stats-modal__section {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-2);
+  gap: var(--sp-3);
 }
 .stats-modal__section-title {
   font-size: var(--fs-caption1);
@@ -2814,7 +2801,7 @@ body[data-glass="light"] .plant-detail__photo-add {
   display: flex;
   align-items: flex-end;
   gap: 6px;
-  height: 72px;
+  height: 80px;
 }
 .stats-modal__bar-col {
   display: flex;
@@ -2837,13 +2824,21 @@ body[data-glass="light"] .plant-detail__photo-add {
   background: var(--accent);
   border-radius: 4px;
   min-height: 0;
-  transition: height 400ms var(--ease-ios);
+  transition: height 400ms var(--ease-ios), background 300ms var(--ease-ios);
   opacity: .85;
+}
+.stats-modal__bar-fill--full {
+  background: var(--green);
+  opacity: 1;
 }
 .stats-modal__bar-day {
   font-size: var(--fs-caption2);
   color: var(--text-muted);
   font-weight: 600;
+}
+.stats-modal__bar-day--today {
+  color: var(--accent);
+  font-weight: 800;
 }
 
 /* Health chips */
