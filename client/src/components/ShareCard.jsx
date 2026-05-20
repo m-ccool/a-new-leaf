@@ -1,6 +1,8 @@
-import { useEffect, useRef } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { usePlants } from '../context/PlantContext';
 import LockBadge from './LockBadge';
+import PlantViewer from './PlantViewer';
+import { MODELS } from '../hooks/usePlantAPI';
 
 const GRADE_COLORS = {
   A: '#3d9c68', B: '#52b788', C: '#f59e0b', D: '#fb923c', F: '#ef4444',
@@ -117,20 +119,39 @@ export default function ShareCard({ open, onOpenSubscription }) {
   }
 
   if (!isPro) {
+    const lockedModel = MODELS[user?.avatarModelIdx ?? 0];
     return (
       <div className="share-card-locked" onClick={onOpenSubscription}>
         <div className="share-card-locked__preview" aria-hidden="true">
-          <div className="share-card-locked__grade">A</div>
-          <p className="share-card-locked__label">Share Your Garden</p>
+          <Suspense fallback={null}>
+            <PlantViewer modelUrl={lockedModel} height={140} compact />
+          </Suspense>
+          <div className="share-card-locked__grade" style={{ color: GRADE_COLORS[grade] ?? 'var(--green)' }}>
+            {grade ?? 'A'}
+          </div>
         </div>
         <LockBadge onUnlock={onOpenSubscription} />
       </div>
     );
   }
 
+  const proModel = MODELS[user?.avatarModelIdx ?? 0];
   return (
     <div className="share-card">
-      <canvas ref={canvasRef} className="share-card__canvas" aria-label="Garden share card preview" />
+      {/* Hidden canvas - used only for share image generation */}
+      <canvas ref={canvasRef} style={{ display: 'none' }} aria-hidden="true" />
+      {/* Glass preview with live 3D model + grade overlay */}
+      <div className="share-card__preview">
+        <Suspense fallback={null}>
+          <PlantViewer modelUrl={proModel} height={160} compact />
+        </Suspense>
+        <div
+          className="share-card__grade-overlay"
+          style={{ color: GRADE_COLORS[grade] ?? 'var(--green)' }}
+        >
+          {grade ?? '?'}
+        </div>
+      </div>
       <button className="btn btn--primary share-card__btn" onClick={handleShare}>
         🎴 Share Garden
       </button>

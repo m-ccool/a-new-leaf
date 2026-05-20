@@ -30,7 +30,7 @@ export default function PlantViewer({ modelUrl, height = 200, compact = false })
   const cameraPos = compact ? [0, 0.2, 1.6] : [0, 1, 3];
   const fov       = compact ? 55 : 45;
   return (
-    <div style={{ width: '100%', height, background: 'transparent' }}>
+    <div style={{ width: '100%', height, background: 'transparent', position: 'relative', zIndex: 1, transform: 'translateZ(0)', isolation: 'isolate' }}>
       <Canvas camera={{ position: cameraPos, fov }} gl={{ alpha: true }} style={{ background: 'transparent' }}>
         <ambientLight intensity={0.8} />
         <directionalLight position={[5, 5, 5]} intensity={1} />

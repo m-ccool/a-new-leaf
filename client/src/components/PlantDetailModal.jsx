@@ -232,7 +232,7 @@ export default function PlantDetailModal({ open, plant: plantProp, onClose, onLe
           <PlantViewer modelUrl={plant.species.model} height={300} />
           <div className="plant-detail__water-wrap plant-detail__viewer-water">
             <button className="plant-detail__water-overlay-btn" onClick={handleWater} aria-label="Water plant">
-              💧
+              💧 Water Plant
             </button>
             {bursting && (
               <div className="water-burst" aria-hidden="true">

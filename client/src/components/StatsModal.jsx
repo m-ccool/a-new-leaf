@@ -129,7 +129,7 @@ export default function StatsModal({ open, onClose, onOpenSubscription }) {
                     <div className="stats-modal__bar-track">
                       <div
                         className={`stats-modal__bar-fill${isFull ? ' stats-modal__bar-fill--full' : ''}`}
-                        style={{ height: `${Math.max(count / maxBars, count > 0 ? 0.12 : 0) * 100}%` }}
+                        style={{ height: count > 0 ? `${Math.max(count / maxBars, 0.12) * 100}%` : '3px' }}
                       />
                     </div>
                     <span className={`stats-modal__bar-day${i === 6 ? ' stats-modal__bar-day--today' : ''}`}>
